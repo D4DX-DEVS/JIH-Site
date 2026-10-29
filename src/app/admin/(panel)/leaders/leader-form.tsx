@@ -1,0 +1,171 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ExternalLink, Loader2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Panel } from "@/components/admin/admin-ui";
+import { ConfirmAction } from "@/components/admin/confirm-action";
+import { Field, describedBy } from "@/components/admin/form-bits";
+import { MediaField } from "@/components/admin/media-picker";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { LeaderGroup } from "@/db/schema";
+import { leaderSchema, type LeaderFormValues } from "@/lib/validation/admin";
+import { routes } from "@/lib/routes";
+import type { PickerMedia } from "../media/actions";
+import { deleteLeaderAction, saveLeaderAction } from "./actions";
+
+interface LeaderFormProps {
+  id: number | null;
+  initial: LeaderFormValues;
+  photo: PickerMedia | null;
+  groups: Array<{ value: LeaderGroup; label: string }>;
+}
+
+export function LeaderForm({ id, initial, photo: initialPhoto, groups }: LeaderFormProps) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [photo, setPhoto] = useState(initialPhoto);
+  const form = useForm<LeaderFormValues>({ resolver: zodResolver(leaderSchema), defaultValues: initial });
+  const { errors } = form.formState;
+
+  const onSubmit = form.handleSubmit((values) =>
+    startTransition(async () => {
+      const result = await saveLeaderAction(id, values);
+      if (!result.ok) {
+        for (const [field, message] of Object.entries(result.fieldErrors ?? {})) form.setError(field as keyof LeaderFormValues, { message });
+        toast.error(result.error);
+        return;
+      }
+      toast.success(id ? "Leader saved" : "Leader added");
+      form.reset(form.getValues());
+      if (!id) router.replace(`/admin/leaders/${result.id}/`);
+      else router.refresh();
+    }),
+  );
+
+  return (
+    <form onSubmit={onSubmit} noValidate className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="space-y-6">
+        <Panel title="Profile">
+          <div className="space-y-4">
+            <Field id="name" label="Name" error={errors.name?.message}>
+              <Input id="name" className="h-11 text-base" aria-invalid={!!errors.name} aria-describedby={describedBy("name", errors.name?.message)} {...form.register("name")} />
+            </Field>
+            <Field id="roleTitle" label="Role" error={errors.roleTitle?.message} hint="For example: Secretary, Shoora member.">
+              <Input id="roleTitle" className="h-11" aria-describedby={describedBy("roleTitle", errors.roleTitle?.message, "x")} {...form.register("roleTitle")} />
+            </Field>
+            <Field id="slug" label="URL slug" error={errors.slug?.message} hint="Leave empty to create one from the name. Changing it changes the public URL.">
+              <Input id="slug" className="h-11" aria-invalid={!!errors.slug} aria-describedby={describedBy("slug", errors.slug?.message, "x")} {...form.register("slug")} />
+            </Field>
+            <div className="space-y-2">
+              <span className="text-sm font-medium">Biography</span>
+              <Controller
+                control={form.control}
+                name="bioHtml"
+                render={({ field }) => <RichTextEditor value={field.value ?? ""} onChange={field.onChange} label="Biography" invalid={!!errors.bioHtml} />}
+              />
+              {errors.bioHtml ? <p className="text-sm text-destructive">{errors.bioHtml.message}</p> : null}
+            </div>
+          </div>
+        </Panel>
+      </div>
+
+      <div className="space-y-6">
+        <Panel title="Publish">
+          <div className="space-y-4">
+            <Field id="status" label="Status" error={errors.status?.message}>
+              <Controller
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="status" className="h-11 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            <Field id="groupKey" label="Group" error={errors.groupKey?.message}>
+              <Controller
+                control={form.control}
+                name="groupKey"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="groupKey" className="h-11 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {groups.map((g) => (
+                        <SelectItem key={g.value} value={g.value}>
+                          {g.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            <Field id="sortOrder" label="Order" error={errors.sortOrder?.message} hint="Lower numbers come first within the group.">
+              <Input id="sortOrder" type="number" inputMode="numeric" min={0} className="h-11" aria-describedby={describedBy("sortOrder", errors.sortOrder?.message, "x")} {...form.register("sortOrder", { valueAsNumber: true })} />
+            </Field>
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" className="h-11 flex-1" disabled={pending}>
+                {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
+                {pending ? "Saving…" : "Save"}
+              </Button>
+              {id && initial.slug ? (
+                <Button asChild variant="outline" className="h-11">
+                  <a href={routes.leader(initial.slug)} target="_blank" rel="noopener">
+                    <ExternalLink className="size-4" aria-hidden="true" /> View
+                  </a>
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </Panel>
+        <Panel title="Photo">
+          <Controller
+            control={form.control}
+            name="photoMediaId"
+            render={({ field }) => (
+              <MediaField
+                label="Photo"
+                value={field.value ?? null}
+                preview={photo}
+                onChange={(m) => {
+                  setPhoto(m);
+                  field.onChange(m?.id ?? null);
+                }}
+              />
+            )}
+          />
+        </Panel>
+        {id ? (
+          <ConfirmAction
+            trigger={
+              <Button type="button" variant="outline" className="h-11 w-full text-destructive">
+                <Trash2 className="size-4" aria-hidden="true" /> Remove leader
+              </Button>
+            }
+            title="Remove this leader?"
+            description="The profile is removed from the leaders page and its URL will return “not found”. The photo stays in the media library. This cannot be undone. To hide the profile instead, set the status to Draft."
+            confirmLabel="Remove leader"
+            action={() => deleteLeaderAction(id)}
+            redirectTo="/admin/leaders/"
+          />
+        ) : null}
+      </div>
+    </form>
+  );
+}

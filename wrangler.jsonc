@@ -1,0 +1,37 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "jih-kerala",
+  "main": "worker.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "jih-kerala"
+    }
+  ],
+  // Local development uses Miniflare's emulated D1/R2 in .wrangler/state.
+  // Before the first production deploy, add the existing database_id (from your Cloudflare
+  // account) to the DB binding below and confirm bucket_name matches your existing R2 bucket.
+  // See docs/DEPLOYMENT.md.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "jih-kerala",
+      "migrations_dir": "drizzle/migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "jih-kerala-media"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
