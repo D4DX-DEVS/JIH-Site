@@ -48,10 +48,10 @@ export function PostCard({ post, variant = "card", headingLevel = "h3", priority
         ) : (
           <div className="lattice absolute inset-0 -z-10 bg-navy" aria-hidden="true" />
         )}
-        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-navy-deep via-navy-deep/70 to-transparent" />
+        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/50 to-transparent" />
         <div className="space-y-3 p-6 sm:p-8">
           <Meta post={post} light />
-          <Heading className="font-heading text-2xl font-extrabold leading-tight sm:text-3xl">
+          <Heading className="line-clamp-3 font-heading text-xl font-extrabold leading-tight wrap-break-word sm:text-2xl xl:text-3xl">
             <Link href={href} className="link-draw after:absolute after:inset-0">
               {post.title}
             </Link>
@@ -70,7 +70,7 @@ export function PostCard({ post, variant = "card", headingLevel = "h3", priority
         </div>
         <div className="min-w-0 space-y-2 py-0.5">
           <Meta post={post} />
-          <Heading className="line-clamp-3 font-heading text-base font-bold leading-snug text-ink transition-colors group-hover:text-navy sm:text-lg">
+          <Heading className="line-clamp-3 font-heading text-base font-bold leading-snug wrap-break-word text-ink transition-colors group-hover:text-navy sm:text-lg">
             <Link href={href} className="after:absolute after:inset-0">
               {post.title}
             </Link>
@@ -91,7 +91,7 @@ export function PostCard({ post, variant = "card", headingLevel = "h3", priority
       </div>
       <div className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
         <Meta post={post} />
-        <Heading className="line-clamp-3 font-heading text-lg font-bold leading-snug text-ink transition-colors group-hover:text-navy sm:text-xl">
+        <Heading className="line-clamp-3 font-heading text-lg font-bold leading-snug wrap-break-word text-ink transition-colors group-hover:text-navy sm:text-xl">
           <Link href={href} className="after:absolute after:inset-0">
             {post.title}
           </Link>

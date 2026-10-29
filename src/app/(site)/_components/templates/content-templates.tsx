@@ -5,6 +5,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { ButtonLink } from "@/components/site/section-heading";
 import { listPagesInSection, type PageDetail } from "@/lib/data/pages";
 import { routes } from "@/lib/routes";
+import { cn } from "@/lib/utils";
 import type { PageSection } from "@/db/schema";
 import type { PublicMedia } from "@/lib/data/media";
 import { ArticleBody, PageHero, SideCard, type Crumb } from "../article-chrome";
@@ -20,7 +21,7 @@ const SECTION_HUBS: Partial<Record<PageSection, { title: string; url: string }>>
 
 export async function ContentPage({ page }: { page: PageDetail }) {
   const hub = SECTION_HUBS[page.section];
-  const siblings = hub ? (await listPagesInSection(page.section)).filter((p) => p.id !== page.id) : [];
+  const sectionPages = hub ? await listPagesInSection(page.section) : [];
   const crumbs: Crumb[] = [...(hub && page.slug !== "about-us" ? [{ name: hub.title, url: hub.url }] : []), { name: page.title, url: routes.page(page.slug) }];
   return (
     <article>
@@ -28,7 +29,6 @@ export async function ContentPage({ page }: { page: PageDetail }) {
         title={page.title}
         lead={page.section !== "general" && page.section !== "about" ? page.summary : undefined}
         crumbs={crumbs}
-        image={page.featuredMedia}
         aside={
           page.externalUrl ? (
             <ButtonLink href={page.externalUrl} variant="light" external className="no-underline">
@@ -40,22 +40,58 @@ export async function ContentPage({ page }: { page: PageDetail }) {
       />
       <ArticleBody
         html={page.contentHtml}
-        aside={
-          siblings.length ? (
-            <SideCard title={`More in ${hub!.title}`}>
-              <nav aria-label={`More in ${hub!.title}`}>
-                <ul className="-mx-2 space-y-0.5">
-                  {siblings.map((s) => (
-                    <li key={s.id}>
+        image={page.featuredMedia}
+        imageAlt={page.title}
+        mobileNav={
+          sectionPages.length > 1 ? (
+            <nav aria-label={`${hub!.title} pages`} className="-mx-[var(--page-gutter)]">
+              <ul className="flex gap-2 overflow-x-auto px-[var(--page-gutter)] pb-1 [scrollbar-width:none]">
+                {sectionPages.map((s) => {
+                  const current = s.id === page.id;
+                  return (
+                    <li key={s.id} className="shrink-0">
                       <Link
                         href={routes.page(s.slug)}
-                        className="group flex min-h-11 items-center justify-between gap-3 rounded-xl px-2 py-2 text-ink transition-colors hover:bg-white hover:text-navy"
+                        aria-current={current ? "page" : undefined}
+                        className={cn(
+                          "inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-4 text-sm font-medium transition-colors",
+                          current ? "bg-navy text-white" : "bg-white text-ink hover:text-navy",
+                        )}
                       >
-                        <span className="leading-snug">{s.title}</span>
-                        <ArrowRight className="size-4 shrink-0 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden="true" />
+                        {s.title}
                       </Link>
                     </li>
-                  ))}
+                  );
+                })}
+              </ul>
+            </nav>
+          ) : null
+        }
+        aside={
+          sectionPages.length > 1 ? (
+            <SideCard title={hub!.title}>
+              <nav aria-label={`${hub!.title} pages`}>
+                <ul className="-mx-2 space-y-0.5">
+                  {sectionPages.map((s) => {
+                    const current = s.id === page.id;
+                    return (
+                      <li key={s.id}>
+                        <Link
+                          href={routes.page(s.slug)}
+                          aria-current={current ? "page" : undefined}
+                          className={cn(
+                            "group flex min-h-11 items-center justify-between gap-3 rounded-xl px-3 py-2 transition-colors",
+                            current ? "bg-navy font-semibold text-white" : "text-ink hover:bg-mist hover:text-navy",
+                          )}
+                        >
+                          <span className="leading-snug">{s.title}</span>
+                          {current ? null : (
+                            <ArrowRight className="size-4 shrink-0 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden="true" />
+                          )}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </nav>
             </SideCard>

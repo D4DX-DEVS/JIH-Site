@@ -1,20 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Anek_Malayalam, Noto_Sans_Malayalam } from "next/font/google";
+import { Anek_Malayalam, Noto_Sans_Malayalam, Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
+// English is set in Poppins. The Malayalam faces load only their Malayalam subset, so the browser
+// takes Latin letters from Poppins and Malayalam letters from the font that follows it in the stack.
+const latin = Poppins({
+  variable: "--font-latin",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
 const display = Anek_Malayalam({
   variable: "--font-display",
-  subsets: ["malayalam", "latin"],
-  weight: ["500", "700", "800"],
+  subsets: ["malayalam"],
   display: "swap",
 });
 
 const body = Noto_Sans_Malayalam({
   variable: "--font-body",
-  subsets: ["malayalam", "latin"],
-  weight: ["400", "500", "700"],
+  subsets: ["malayalam"],
   display: "swap",
 });
 
@@ -39,7 +46,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ml" className={`${display.variable} ${body.variable} h-full antialiased`}>
+    <html lang="ml" className={`${latin.variable} ${display.variable} ${body.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <noscript>
           {/* Scroll entrances start hidden; without script they must stay visible. */}

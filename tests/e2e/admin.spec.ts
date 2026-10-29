@@ -10,7 +10,8 @@ test.describe("admin access control", () => {
     }
     await page.goto("/admin/media/");
     await expect(page).toHaveURL(/\/admin\/login\/$/);
-    await expect(page.getByRole("heading", { name: "Sign in to the admin" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Welcome back" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
   });
 
   test("a forged session cookie does not open the admin", async ({ page, context, baseURL }) => {

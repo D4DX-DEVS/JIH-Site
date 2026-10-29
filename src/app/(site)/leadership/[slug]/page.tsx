@@ -37,8 +37,6 @@ export default async function LeaderPage({ params }: PageProps<"/leadership/[slu
   return (
     <article>
       <header className="lattice relative overflow-hidden bg-navy-deep text-white [--lattice-mask:radial-gradient(ellipse_at_top_right,#000_10%,transparent_70%)] [--lattice-opacity:0.12]">
-        <div aria-hidden="true" className="absolute -right-40 -top-40 -z-10 size-[36rem] rounded-full bg-navy/70 blur-3xl" />
-        <div aria-hidden="true" className="absolute -bottom-48 -left-32 -z-10 size-[28rem] rounded-full bg-maroon/25 blur-3xl" />
         <div className="page-frame pb-14 pt-8 lg:pb-20 lg:pt-10">
           <Breadcrumbs items={[{ name: "Leaders", url: "/leaders/" }, { name: leader.name, url: routes.leader(leader.slug) }]} />
           <div className="mt-8 grid items-center gap-10 sm:grid-cols-[minmax(0,16rem)_minmax(0,1fr)] lg:mt-12 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">

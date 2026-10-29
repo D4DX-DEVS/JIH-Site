@@ -44,7 +44,7 @@ Nothing in this guide has been run against the production Cloudflare account. Ea
 
 ## After launch: content fixes that need a person
 
-- Admin → Settings → Contact: the email copied from WordPress uses the staging hostname (`…@wordpress-1683093-6756662.cloudwaysapps.com`). Enter the real address.
+- Admin → Settings → Contact: the email copied from WordPress used the staging hostname. The import now writes `hiracenter@jihkerala.org`; a database imported before that change still holds the old address, so set it there (or run `npx wrangler d1 execute DB --remote --command "UPDATE settings SET value = json_set(value, '$.email', 'hiracenter@jihkerala.org') WHERE key = 'contact';"`).
 - Admin → Settings → Social: the Facebook link from WordPress is broken. Enter the real page URL.
 - Admin → Pages → `/medical/`: the body text contains the staging hostname email.
 - 56 media items are private on WordPress, and the TranslatePress `/ml/` strings were not exported. Both need a WordPress admin export if they are wanted.

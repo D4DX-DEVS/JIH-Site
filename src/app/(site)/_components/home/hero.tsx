@@ -1,9 +1,8 @@
 /* eslint-disable @next/next/no-img-element -- R2 media with stored variants */
 import Link from "next/link";
-import { ArrowRight, Clock } from "lucide-react";
-import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { ArrowRight } from "lucide-react";
+import { Stagger, StaggerItem } from "@/components/motion/reveal";
 import { ButtonLink } from "@/components/site/section-heading";
-import { formatDate } from "@/lib/format";
 import { mediaUrl, pickVariant, srcSetFor } from "@/lib/media-url";
 import { routes } from "@/lib/routes";
 import type { HomeData } from "@/lib/data/home";
@@ -45,74 +44,32 @@ function Banner({ data }: { data: HomeData }) {
 }
 
 export function Hero({ data }: { data: HomeData }) {
-  const updates = data.latest.slice(0, 3);
   return (
     <section aria-labelledby="home-title" className="bg-navy-deep text-white">
       <Banner data={data} />
       <div className="lattice relative overflow-hidden [--lattice-mask:linear-gradient(100deg,#000_0%,transparent_60%)] [--lattice-opacity:0.1]">
-        <div aria-hidden="true" className="absolute -right-40 -top-32 -z-10 size-[34rem] rounded-full bg-navy/70 blur-3xl" />
-        <div className="page-frame grid gap-10 py-12 lg:grid-cols-12 lg:items-center lg:gap-12 lg:py-16">
-          <Stagger className="lg:col-span-6 xl:col-span-7">
-            <StaggerItem>
-              <p className="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium">
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-gold opacity-75 motion-reduce:hidden" />
-                  <span className="relative inline-flex size-2 rounded-full bg-gold" />
-                </span>
-                jihkerala.org
-              </p>
-            </StaggerItem>
-            <StaggerItem>
-              <h1 id="home-title" className="mt-5 font-heading text-[clamp(2rem,1.4rem+2.4vw,3.5rem)] font-extrabold leading-[1.1] tracking-tight">
+        <div className="page-frame py-8 lg:py-12">
+          <Stagger className="grid gap-x-12 lg:grid-cols-12 lg:items-end">
+            <StaggerItem className="lg:col-span-6">
+              <h1 id="home-title" className="font-heading text-[clamp(2rem,1.4rem+2.4vw,3.5rem)] font-extrabold leading-[1.1] tracking-tight">
                 {data.settings.site.name || "Jamaat-e-Islami Hind Kerala"}
               </h1>
             </StaggerItem>
-            {data.settings.site.tagline ? (
-              <StaggerItem>
-                <p className="mt-4 max-w-[52ch] text-lg leading-relaxed text-on-navy-soft lg:text-xl">{data.settings.site.tagline}</p>
-              </StaggerItem>
-            ) : null}
-            <StaggerItem className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/news/">
-                Latest news <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
-              </ButtonLink>
-              <ButtonLink href="/about-us/" variant="ghost">
-                About the movement
-              </ButtonLink>
+            <StaggerItem className="lg:col-span-6">
+              {data.settings.site.tagline ? (
+                <p className="mt-4 max-w-[52ch] text-lg leading-relaxed text-on-navy-soft lg:mt-0">{data.settings.site.tagline}</p>
+              ) : null}
+              {/* One row on phones too: tighter padding and text below `sm`, full size above. */}
+              <div className="mt-6 flex flex-wrap gap-2 sm:gap-3">
+                <ButtonLink href="/news/" className="min-h-11 px-3.5 text-sm sm:min-h-12 sm:px-6 sm:text-base">
+                  Latest news <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
+                </ButtonLink>
+                <ButtonLink href="/about-us/" variant="ghost" className="min-h-11 px-3.5 text-sm sm:min-h-12 sm:px-6 sm:text-base">
+                  About the movement
+                </ButtonLink>
+              </div>
             </StaggerItem>
           </Stagger>
-
-          {updates.length ? (
-            <Reveal x={32} y={0} delay={0.2} className="min-w-0 lg:col-span-6 xl:col-span-5">
-              <div className="rounded-3xl border border-white/15 bg-white/[0.06] p-3 shadow-[0_30px_80px_-30px_rgb(0_0_0/0.6)]">
-                <p className="flex items-center justify-between px-3 pb-2 pt-2 text-sm font-semibold">
-                  Latest updates
-                  <Link href="/news/" className="inline-flex min-h-9 items-center gap-1 text-on-navy-soft transition-colors hover:text-white">
-                    All <ArrowRight className="size-3.5" aria-hidden="true" />
-                  </Link>
-                </p>
-                <ul>
-                  {updates.map((post) => (
-                    <li key={post.id}>
-                      <Link href={routes.post(post.slug)} className="group flex gap-4 rounded-2xl p-3 transition-colors duration-300 hover:bg-white/10">
-                        <span className="relative block aspect-[4/3] w-20 shrink-0 overflow-hidden rounded-xl bg-white/10 sm:w-24">
-                          {post.featuredMedia ? <img src={pickVariant(post.featuredMedia, 300)} alt="" loading="lazy" className="img-zoom size-full object-cover" /> : null}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="line-clamp-2 font-heading font-bold leading-snug">{post.title}</span>
-                          {post.publishedAt ? (
-                            <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-on-navy-soft">
-                              <Clock className="size-3" aria-hidden="true" /> {formatDate(post.publishedAt)}
-                            </span>
-                          ) : null}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </Reveal>
-          ) : null}
         </div>
       </div>
     </section>

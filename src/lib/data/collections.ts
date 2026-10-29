@@ -148,6 +148,12 @@ export interface VideoItem {
   publishedAt: string | null;
 }
 
+/** YouTube titles arrive dressed with emoji (sparkles, microphones); the site shows the words only. */
+function plainVideo<T extends { title: string }>(row: T): T {
+  const title = row.title.replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, "").replace(/\s{2,}/g, " ").trim();
+  return { ...row, title };
+}
+
 export async function listVideos(opts: { page: number; pageSize: number }): Promise<Paginated<VideoItem>> {
   "use cache";
   cacheTag("videos");
@@ -164,7 +170,7 @@ export async function listVideos(opts: { page: number; pageSize: number }): Prom
       .offset((opts.page - 1) * opts.pageSize),
     db.select({ total: sql<number>`count(*)` }).from(videos).where(condition),
   ]);
-  return paginate(rows, total, opts.page, opts.pageSize);
+  return paginate(rows.map(plainVideo), total, opts.page, opts.pageSize);
 }
 
 export async function getVideoBySlug(slug: string): Promise<VideoItem | null> {
@@ -177,7 +183,7 @@ export async function getVideoBySlug(slug: string): Promise<VideoItem | null> {
     .from(videos)
     .where(and(eq(videos.slug, slug), eq(videos.status, "published")))
     .limit(1);
-  return row ?? null;
+  return row ? plainVideo(row) : null;
 }
 
 export async function listPosters(): Promise<Array<{ id: number; title: string; linkUrl: string; image: PublicMedia | null }>> {

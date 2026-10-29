@@ -6,7 +6,7 @@ test.describe("public site", () => {
     await page.goto("/");
     await expect(page).toHaveTitle(/Jamaat-e-Islami Hind Kerala/);
     await expect(page.getByRole("heading", { level: 1, name: "Jamaat-e-Islami Hind Kerala" })).toBeVisible();
-    for (const name of ["Latest Updates", "Ameer Updates", "Posters", "News", "Videos", "The movement in Kerala", "Our organisations", "Image Gallery"]) {
+    for (const name of ["Latest Updates", "Ameer Updates", "Posters", "News", "Videos", "Image Gallery"]) {
       await expect(page.getByRole("heading", { level: 2, name, exact: true })).toBeAttached();
     }
     await expect(page.getByRole("contentinfo")).toBeVisible();

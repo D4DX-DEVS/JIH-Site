@@ -10,8 +10,7 @@ import { OrganizationJsonLd } from "@/components/seo/json-ld";
 import { HeadlineTicker, Hero } from "./_components/home/hero";
 import { HomeSkeleton } from "./_components/home/home-skeleton";
 import { AmeerUpdates, LatestUpdates, NewsGrid } from "./_components/home/latest";
-import { ContactBand, GalleryBento, VideosBand } from "./_components/home/media-sections";
-import { Movement, Organisations } from "./_components/home/movement";
+import { GalleryBento, VideosBand } from "./_components/home/media-sections";
 import { PosterMarquee } from "./_components/home/posters";
 import { routes } from "@/lib/routes";
 
@@ -31,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-/** Mirrors the WordPress homepage (Latest Updates, Ameer Updates, Posters, News, Videos, Image Gallery) and adds the organisations and real figures. */
+/** Mirrors the WordPress homepage (Latest Updates, Ameer Updates, Posters, News, Videos, Image Gallery). */
 async function Home() {
   const data = await getHomeData();
   return (
@@ -44,10 +43,7 @@ async function Home() {
       <PosterMarquee posters={data.posters} />
       <NewsGrid posts={data.news} categoryHref={routes.category(["state-news"])} />
       <VideosBand videos={data.videos} />
-      <Movement data={data} />
-      <Organisations data={data} />
       <GalleryBento galleries={data.galleries} categories={data.galleryCategories} />
-      <ContactBand settings={data.settings} photo={data.masthead[1] ?? data.masthead[0]} />
     </>
   );
 }

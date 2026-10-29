@@ -40,9 +40,11 @@ test.describe("entrance animations never hide content", () => {
   });
 
   test("with motion, every section has appeared once scrolled past", async ({ page }) => {
-    await page.goto("/");
-    const height = await page.evaluate(() => document.documentElement.scrollHeight);
-    for (let y = 0; y <= height; y += 400) await page.evaluate((top) => window.scrollTo(0, top), y);
+    // The homepage streams in behind a skeleton; scroll only once the page has finished arriving and
+    // hydrated, and re-measure as we go, or the walk stops at the skeleton's height.
+    await page.goto("/", { waitUntil: "networkidle" });
+    const height = () => page.evaluate(() => document.documentElement.scrollHeight);
+    for (let y = 0; y <= (await height()); y += 400) await page.evaluate((top) => window.scrollTo(0, top), y);
     await expect.poll(() => hiddenReveals(page), { timeout: 10_000 }).toBe(0);
   });
 });

@@ -38,7 +38,7 @@ export function PosterMarquee({ posters }: { posters: HomeData["posters"] }) {
       <div className="page-frame">
         <SectionHeading id="posters-title" title="Posters" lead="Campaign posters and announcements from the movement." />
       </div>
-      <div className="mt-10 overflow-hidden py-4 [mask-image:linear-gradient(90deg,transparent,#000_6%,#000_94%,transparent)] motion-reduce:overflow-x-auto lg:mt-14">
+      <div className="mt-6 overflow-hidden py-4 [mask-image:linear-gradient(90deg,transparent,#000_6%,#000_94%,transparent)] motion-reduce:overflow-x-auto lg:mt-8">
         {items.length > 2 ? (
           <div className="flex w-max animate-marquee hover:[animation-play-state:paused] focus-within:[animation-play-state:paused] motion-reduce:animate-none [--marquee-duration:55s] [--marquee-gap:0rem]">
             {row(false)}

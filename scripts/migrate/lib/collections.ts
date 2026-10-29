@@ -204,8 +204,10 @@ export async function seedSettings(db: Db, ledger: Ledger, media: MediaIndex) {
       postBox: "PB No: 833",
       address: "Hira Centre, Mavoor Road, Calicut - 673004",
       phone: "0495 2722709",
-      // Value as found on the source; it contains the staging hostname and must be corrected.
-      email: (footer.find('a[href^="mailto:"]').first().attr("href") ?? "").replace(/^mailto:\s*(%20)?/i, ""),
+      // The source footer links an address on the staging hostname; the organisation's real mailbox replaces it.
+      email: ((source) => (source.includes("cloudwaysapps.com") ? "hiracenter@jihkerala.org" : source))(
+        (footer.find('a[href^="mailto:"]').first().attr("href") ?? "").replace(/^mailto:\s*(%20)?/i, ""),
+      ),
       website: "http://www.jamaateislamihind.org/eng/",
       mapEmbedUrl: mapSrc,
     },
@@ -224,10 +226,6 @@ export async function seedSettings(db: Db, ledger: Ledger, media: MediaIndex) {
     const missing = Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([k]) => !(k in stored)));
     if (Object.keys(missing).length) await db.update(schema.settings).set({ value: { ...stored, ...missing } }).where(eq(schema.settings.key, key));
     await ledger.record({ sourceType: "settings", sourceId: key, status: "imported", targetTable: "settings", targetId: key });
-  }
-  const contact = values.contact as { email: string };
-  if (contact.email.includes("cloudwaysapps.com")) {
-    await ledger.record({ sourceType: "settings-issue", sourceId: "contact.email", status: "unresolved", message: `Email on the source site uses the staging hostname (${contact.email}); correct it in Admin → Settings` });
   }
   const fb = (values.social as { facebook: string }).facebook;
   if (fb.includes("cloudwaysapps.com")) {

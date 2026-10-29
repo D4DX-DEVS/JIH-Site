@@ -15,8 +15,6 @@ export function NotFoundContent() {
       aria-labelledby="nf-title"
       className="lattice relative overflow-hidden bg-navy-deep text-white [--lattice-mask:radial-gradient(ellipse_at_center,#000_20%,transparent_75%)] [--lattice-opacity:0.12]"
     >
-      <div aria-hidden="true" className="absolute -right-40 -top-40 -z-10 size-[36rem] rounded-full bg-navy/70 blur-3xl" />
-      <div aria-hidden="true" className="absolute -bottom-48 -left-32 -z-10 size-[28rem] rounded-full bg-maroon/30 blur-3xl" />
       <div className="page-frame flex flex-col items-center py-20 text-center lg:py-28">
         <p className="font-heading text-[clamp(6rem,18vw,12rem)] font-extrabold leading-none text-white/15 motion-safe:animate-float" aria-hidden="true">
           404

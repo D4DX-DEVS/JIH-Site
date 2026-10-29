@@ -12,8 +12,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-body), "Noto Sans Malayalam", system-ui, sans-serif;
-  --font-heading: var(--font-display), var(--font-body), system-ui, sans-serif;
+  /* Poppins for Latin, then the Malayalam face: Noto Sans Malayalam for text, Anek Malayalam for titles. */
+  --font-sans: var(--font-latin), var(--font-body), system-ui, sans-serif;
+  --font-heading: var(--font-latin), var(--font-display), var(--font-body), system-ui, sans-serif;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.4;
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -61,7 +64,8 @@
   --color-on-navy-soft: var(--on-navy-soft);
   --color-mist: var(--mist);
   --color-gold: var(--gold);
-  --shadow-soft: 0 1px 2px rgb(11 18 51 / 0.04), 0 10px 30px -14px rgb(11 18 51 / 0.18);
+  /* Surfaces at rest are flat: a tone step separates them. Only what floats or is lifted on hover casts a shadow. */
+  --shadow-soft: 0 0 #0000;
   --shadow-lift: 0 2px 6px rgb(11 18 51 / 0.06), 0 28px 56px -24px rgb(7 30 127 / 0.38);
   --animate-marquee: marquee var(--marquee-duration, 60s) linear infinite;
   --animate-kenburns: kenburns 16s ease-out both;
@@ -83,13 +87,13 @@
   --maroon: #7e1146;
   --maroon-deep: #5e0c34;
   --paper: #ffffff;
-  --tint: #f5efe4;
+  --tint: #e8eaf0;
   --ink: #0b1233;
   --ink-soft: #4a5170;
   --on-navy: #ffffff;
   --on-navy-soft: #c9cfee;
   /* Warm ivory field for alternating sections (pairs with the gold accent); gold is a hairline accent only. */
-  --mist: #fbf6ec;
+  --mist: #f3f4f7;
   --gold: #c99a3c;
 
   --background: var(--paper);
@@ -126,7 +130,8 @@
   --sidebar-ring: var(--navy);
 
   --page-gutter: clamp(1rem, 0.5rem + 2vw, 2rem);
-  --section-gap: clamp(4rem, 2.5rem + 5vw, 7.5rem);
+  /* Each section pads top and bottom by this, so neighbouring sections sit twice this apart (~80px on a phone, ~134px at 1440). */
+  --section-gap: clamp(2.5rem, 1.5rem + 3vw, 4.5rem);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -176,6 +181,7 @@
     overflow-wrap: anywhere;
   }
   .prose-content > * + * { margin-top: 1.1em; }
+  .prose-content > :first-child { margin-top: 0; }
   .prose-content h2 { font-size: var(--text-step-2); line-height: 1.3; font-weight: 700; margin-top: 2em; }
   .prose-content h3 { font-size: 1.2rem; line-height: 1.35; font-weight: 700; margin-top: 1.8em; }
   .prose-content h4, .prose-content h5, .prose-content h6 { font-size: 1.0625rem; font-weight: 700; margin-top: 1.6em; }
@@ -186,7 +192,8 @@
   .prose-content li + li { margin-top: 0.4em; }
   .prose-content strong, .prose-content b { font-weight: 700; }
   .prose-content blockquote { padding: 1.25rem 1.5rem; background: var(--mist); border-left: 3px solid var(--maroon); border-radius: 0 var(--radius) var(--radius) 0; font-size: var(--text-step-2); line-height: 1.5; }
-  .prose-content img { width: 100%; height: auto; border-radius: var(--radius); }
+  /* Tinted while a large picture loads, so the space never reads as a blank gap. */
+  .prose-content img { width: 100%; height: auto; border-radius: var(--radius); background: var(--mist); }
   .prose-content figure figcaption { font-size: var(--text-step-0); color: var(--ink-soft); margin-top: 0.5rem; }
   .prose-content iframe { width: 100%; aspect-ratio: 16 / 9; height: auto; border-radius: var(--radius); }
   .prose-content table { width: 100%; border-collapse: collapse; font-size: 0.95rem; display: block; overflow-x: auto; }

@@ -9,15 +9,18 @@ import { getSettings } from "@/lib/data/settings";
 import { DesktopNav } from "./desktop-nav";
 import { HeaderShell } from "./header-shell";
 import { MobileNav } from "./mobile-nav";
+import { SocialIcon } from "./social-icons";
 
 async function TopBar() {
   const { contact, social } = await getSettings();
-  const socials = [
-    { href: social.facebook, label: "Facebook" },
-    { href: social.youtube, label: "YouTube" },
-    { href: social.instagram, label: "Instagram" },
-    { href: social.twitter, label: "X" },
-  ].filter((s) => s.href);
+  const socials = (
+    [
+      { href: social.facebook, label: "Facebook", network: "facebook" },
+      { href: social.instagram, label: "Instagram", network: "instagram" },
+      { href: social.twitter, label: "X", network: "x" },
+      { href: social.youtube, label: "YouTube", network: "youtube" },
+    ] as const
+  ).filter((s) => s.href);
   return (
     <div className="page-frame flex h-10 items-center justify-between gap-6 text-[0.8rem] text-on-navy-soft">
       <ul className="flex min-w-0 items-center gap-5">
@@ -43,12 +46,18 @@ async function TopBar() {
         ) : null}
       </ul>
       {socials.length ? (
-        <ul className="flex shrink-0 items-center gap-4" aria-label="Social media">
+        <ul className="flex shrink-0 items-center gap-1" aria-label="Social media">
           {socials.map((s) => (
-            <li key={s.label}>
-              <a href={s.href} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">
-                {s.label}
-                <span className="sr-only"> (opens in a new tab)</span>
+            <li key={s.network}>
+              <a
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${s.label} (opens in a new tab)`}
+                title={s.label}
+                className="inline-flex size-8 items-center justify-center rounded-full transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <SocialIcon network={s.network} className="size-3.5" />
               </a>
             </li>
           ))}
