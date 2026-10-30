@@ -44,7 +44,7 @@ export default async function EditGalleryPage({ params }: PageProps<"/admin/gall
         <Link href="/admin/galleries/" className="inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="size-4" aria-hidden="true" /> Galleries
         </Link>
-        <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{gallery ? "Edit gallery" : "New gallery"}</h1>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">{gallery ? "Edit gallery" : "New gallery"}</h1>
       </div>
       <GalleryForm
         id={id}
@@ -53,8 +53,10 @@ export default async function EditGalleryPage({ params }: PageProps<"/admin/gall
         categories={categories}
         initial={{
           title: gallery?.title ?? "",
+          titleEn: gallery?.titleEn ?? "",
           slug: gallery?.slug ?? "",
           description: gallery?.description ?? "",
+          descriptionEn: gallery?.descriptionEn ?? "",
           categoryId: gallery?.categoryId ?? null,
           coverMediaId: gallery?.coverMediaId ?? null,
           imageIds: images.map((i) => i.id),

@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
+import { useI18n } from "@/components/i18n/i18n-provider";
 import { cn } from "@/lib/utils";
 
 /** Floating button at the lower right that appears once the reader is about a screen down the page. */
 export function BackToTop() {
+  const { t } = useI18n();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -26,8 +28,8 @@ export function BackToTop() {
     <button
       type="button"
       onClick={toTop}
-      aria-label="Back to top"
-      title="Back to top"
+      aria-label={t.common.backToTop}
+      title={t.common.backToTop}
       tabIndex={visible ? 0 : -1}
       aria-hidden={!visible}
       className={cn(

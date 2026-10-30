@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- YouTube thumbnail */
 import { useState } from "react";
 import { Play } from "lucide-react";
+import { useI18n } from "@/components/i18n/i18n-provider";
 import { youtubeThumb } from "@/lib/routes";
 
 /**
@@ -10,6 +11,7 @@ import { youtubeThumb } from "@/lib/routes";
  * only when asked. Without script the link opens the video on YouTube.
  */
 export function YouTubeEmbed({ id, title }: { id: string; title: string }) {
+  const { t } = useI18n();
   const [playing, setPlaying] = useState(false);
   if (playing) {
     return (
@@ -30,7 +32,7 @@ export function YouTubeEmbed({ id, title }: { id: string; title: string }) {
         setPlaying(true);
       }}
       className="group relative block aspect-video w-full overflow-hidden bg-ink"
-      aria-label={`Play video: ${title}`}
+      aria-label={t.videos.play(title)}
     >
       <img src={youtubeThumb(id)} alt="" loading="lazy" decoding="async" className="size-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105" />
       <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-transparent" />

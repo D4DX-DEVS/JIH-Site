@@ -18,10 +18,10 @@ export function MoveButtons({ id, label, first, last }: { id: number; label: str
     });
   return (
     <>
-      <Button type="button" variant="ghost" size="icon" className="size-11 sm:size-9" disabled={pending || first} onClick={() => move("up")} aria-label={`Move ${label} up`}>
+      <Button type="button" variant="ghost" size="icon" className="size-9 sm:size-8" disabled={pending || first} onClick={() => move("up")} aria-label={`Move ${label} up`}>
         <ArrowUp className="size-4" aria-hidden="true" />
       </Button>
-      <Button type="button" variant="ghost" size="icon" className="size-11 sm:size-9" disabled={pending || last} onClick={() => move("down")} aria-label={`Move ${label} down`}>
+      <Button type="button" variant="ghost" size="icon" className="size-9 sm:size-8" disabled={pending || last} onClick={() => move("down")} aria-label={`Move ${label} down`}>
         <ArrowDown className="size-4" aria-hidden="true" />
       </Button>
     </>

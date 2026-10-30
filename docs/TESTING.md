@@ -28,7 +28,7 @@ E2E_ADMIN_EMAIL=test@example.org E2E_ADMIN_PASSWORD=<test password> npm run test
 
 | Spec | What it proves |
 |---|---|
-| `public.spec.ts` | Every homepage section; header navigation; news pagination; past-the-end page; article with breadcrumbs and JSON-LD; search results and empty results; contact form validation |
+| `public.spec.ts` | Every homepage section; header navigation; news pagination; past-the-end page; article with breadcrumb JSON-LD; search results and empty results; contact form validation |
 | `seo-routing.spec.ts` | Status codes: 200 for pages; 404 for missing pages; 308 for stored, config and trailing-slash redirects; 307 to login. Plus noindex on 404s, metadata, `robots.txt`, sitemap and RSS |
 | `admin.spec.ts` | Signed-out redirects, forged-cookie rejection, anonymous and cross-site upload refusal, `X-Robots-Tag`, wrong password, sign-in and sign-out, image upload and delete |
 | `responsive-a11y.spec.ts` | No sideways scrolling at 375/768/1280 px on 8 page types; the mobile menu; no section left invisible by entrance animations (with and without reduced motion, by computed opacity); axe WCAG 2.1 AA with no serious or critical violations on 7 pages |

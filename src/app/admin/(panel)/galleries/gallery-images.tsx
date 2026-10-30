@@ -40,7 +40,7 @@ export function GalleryImages({ images, onChange, error }: GalleryImagesProps) {
         <p className="text-sm text-muted-foreground" aria-live="polite">
           {images.length === 1 ? "1 image" : `${images.length} images`}
         </p>
-        <Button type="button" variant="outline" className="h-11" onClick={() => setOpen(true)}>
+        <Button type="button" variant="outline" className="h-9" onClick={() => setOpen(true)}>
           <ImagePlus className="size-4" aria-hidden="true" /> Add images
         </Button>
       </div>

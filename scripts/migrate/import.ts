@@ -12,6 +12,7 @@ import { importMedia } from "./lib/media";
 import { importPages, importPosts, importTaxonomies } from "./lib/content";
 import { importGalleries, importLeaders, importVideos, seedRedirects, seedSettings, seedStructure } from "./lib/collections";
 import { importFormEntries } from "./lib/forms";
+import { separateStoredLanguages } from "./lib/separate-languages";
 
 const opts = parseArgs(process.argv.slice(2));
 if (opts.remote && !process.argv.includes("--yes-i-have-approval")) {
@@ -45,6 +46,10 @@ try {
   await seedRedirects(db, ledger, media);
   console.log("form entries…");
   await importFormEntries(db, ledger);
+  // WordPress bodies hold an English version followed by the Malayalam one; store them apart.
+  console.log("languages…");
+  const separated = await separateStoredLanguages(db);
+  console.log(`  ${separated.length} records had English moved to their English fields`);
 
   // Source content deliberately not imported, recorded so nothing disappears silently.
   const extract = await readJson<{ summary: Record<string, { count?: number }> }>("raw/_extract-summary.json");
@@ -58,7 +63,7 @@ try {
       : { sourceType: "excluded", sourceId: "media-private", status: "unresolved", message: "REST reports 928 media items but only 872 are publicly listable; 56 need WordPress admin access to export" },
   );
   if (admin) await ledger.record({ sourceType: "excluded", sourceId: "image-gallery-13529", status: "skipped", message: "Draft gallery with no images (\"ഹിറാ നഗര്‍ -\"); the published 1998 Hira Nagar gallery holds the photos" });
-  await ledger.record({ sourceType: "excluded", sourceId: "translatepress", status: "unresolved", message: "TranslatePress /ml/ UI-string translations need a WordPress admin export; /ml/* redirects to canonical pages" });
+  await ledger.record({ sourceType: "excluded", sourceId: "translatepress", status: "imported", message: "Content split into Malayalam and English fields (English at /en/); the archived /ml/ copies supplied the Malayalam history page. /ml/* redirects to the Malayalam pages" });
 
   console.log(`\nDone in ${Math.round((Date.now() - started) / 1000)}s. Ledger:`);
   ledger.print();

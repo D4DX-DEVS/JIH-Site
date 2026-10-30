@@ -57,7 +57,8 @@ export async function POST(request: Request): Promise<Response> {
   const written: string[] = [];
 
   try {
-    await bucket.put(key, file.stream(), {
+    // R2 refuses a File's stream ("must have a known length"); the form is already in memory anyway.
+    await bucket.put(key, await file.arrayBuffer(), {
       httpMetadata: { contentType: file.type, cacheControl: "public, max-age=31536000, immutable" },
       customMetadata: { uploadedBy: session.actor, originalName: file.name.slice(0, 200) },
     });
@@ -74,7 +75,7 @@ export async function POST(request: Request): Promise<Response> {
         const h = Math.round(heights[i]);
         if (!vCheck.ok || v.type !== "image/webp" || v.size > MAX_VARIANT_BYTES || !(w > 0 && w < 5000) || !(h > 0 && h < 10000)) continue;
         const vKey = `${base}-${w}w.webp`;
-        await bucket.put(vKey, v.stream(), { httpMetadata: { contentType: "image/webp", cacheControl: "public, max-age=31536000, immutable" } });
+        await bucket.put(vKey, await v.arrayBuffer(), { httpMetadata: { contentType: "image/webp", cacheControl: "public, max-age=31536000, immutable" } });
         written.push(vKey);
         variants.push({ width: w, height: h, key: vKey });
       }

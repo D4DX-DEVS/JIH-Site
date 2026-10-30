@@ -33,11 +33,10 @@ test.describe("public site", () => {
     await expect(page.getByRole("heading", { name: /could not be found/i }).first()).toBeVisible();
   });
 
-  test("an article renders with breadcrumbs and structured data", async ({ page }) => {
+  test("an article renders with breadcrumb structured data", async ({ page }) => {
     const href = await firstNewsArticle(page);
     await page.goto(href);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toBeVisible();
     const types = await page.locator('script[type="application/ld+json"]').allTextContents();
     expect(types.join(" ")).toContain("BreadcrumbList");
   });

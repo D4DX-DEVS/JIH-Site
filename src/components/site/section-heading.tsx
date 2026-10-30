@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/i18n/link";
 import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";

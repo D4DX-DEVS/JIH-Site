@@ -21,7 +21,7 @@ export async function saveVideoAction(id: number | null, values: VideoFormValues
   const youtubeId = parseYoutubeId(data.youtube);
   if (!youtubeId) return { ok: false, error: "Paste a YouTube link or 11-character video id", fieldErrors: { youtube: "Paste a YouTube link or 11-character video id" } };
   const db = await getDb();
-  const slug = slugOrTitle(data.slug, data.title);
+  const slug = slugOrTitle(data.slug, data.title || data.titleEn);
   if (!slug) return { ok: false, error: "Slug is required", fieldErrors: { slug: "Slug is required" } };
   const [taken] = await db
     .select({ id: videos.id })
@@ -33,9 +33,11 @@ export async function saveVideoAction(id: number | null, values: VideoFormValues
   const now = new Date().toISOString();
   const row = {
     title: data.title,
+    titleEn: data.titleEn,
     slug,
     youtubeId,
     description: data.description,
+    descriptionEn: data.descriptionEn,
     status: data.status,
     publishedAt: data.publishedAt ? new Date(data.publishedAt).toISOString() : data.status === "published" ? now : null,
     updatedAt: now,
@@ -50,7 +52,8 @@ export async function saveVideoAction(id: number | null, values: VideoFormValues
     videoId = created.id;
   }
 
-  await logActivity(session.actor, id ? "update" : "create", "video", videoId!, `${id ? "Updated" : "Added"} video “${data.title}”`);
+  const title = data.title || data.titleEn;
+  await logActivity(session.actor, id ? "update" : "create", "video", videoId!, `${id ? "Updated" : "Added"} video “${title}”`);
   refreshPublic("videos");
   return { ok: true, id: videoId!, slug };
 }
@@ -58,9 +61,10 @@ export async function saveVideoAction(id: number | null, values: VideoFormValues
 export async function deleteVideoAction(id: number): Promise<ActionResult> {
   const session = await requireAdmin();
   const db = await getDb();
-  const [row] = await db.delete(videos).where(eq(videos.id, id)).returning({ title: videos.title });
+  const [row] = await db.delete(videos).where(eq(videos.id, id)).returning({ title: videos.title, titleEn: videos.titleEn });
   if (!row) return { ok: false, error: "Video not found" };
-  await logActivity(session.actor, "delete", "video", id, `Deleted video “${row.title}”`);
+  const title = row.title || row.titleEn;
+  await logActivity(session.actor, "delete", "video", id, `Deleted video “${title}”`);
   refreshPublic("videos");
   return { ok: true, message: "Video deleted" };
 }

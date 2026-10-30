@@ -25,7 +25,10 @@ function ItemRow({ item, menu, parents, index, count, childCount }: { item: Row;
       <div className="flex min-w-0 flex-1 items-center gap-2">
         {item.parentId ? <CornerDownRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /> : null}
         <div className="min-w-0">
-          <p className="truncate font-medium">{item.label}</p>
+          <p className="truncate font-medium">
+            {item.label || item.labelEn}
+            {item.label && item.labelEn ? <span className="ml-2 text-xs font-normal text-muted-foreground">{item.labelEn}</span> : null}
+          </p>
           <p className="truncate text-xs text-muted-foreground">{item.url || "No link (opens its sub-items)"}</p>
         </div>
       </div>
@@ -34,9 +37,9 @@ function ItemRow({ item, menu, parents, index, count, childCount }: { item: Row;
         <NavItemDialog
           menu={menu}
           parents={parents}
-          item={{ id: item.id, label: item.label, url: item.url, parentId: item.parentId, hasChildren: childCount > 0 }}
+          item={{ id: item.id, label: item.label, labelEn: item.labelEn, url: item.url, parentId: item.parentId, hasChildren: childCount > 0 }}
           trigger={
-            <Button variant="ghost" size="icon" className="size-11 sm:size-9" aria-label={`Edit ${item.label}`}>
+            <Button variant="ghost" size="icon" className="size-9 sm:size-8" aria-label={`Edit ${item.label}`}>
               <Pencil className="size-4" aria-hidden="true" />
             </Button>
           }
@@ -93,7 +96,7 @@ async function MenuTree({ menu }: { menu: NavMenu }) {
         menu={menu}
         parents={parents}
         trigger={
-          <Button variant="outline" className="h-11 sm:h-9">
+          <Button variant="outline" className="h-9 sm:h-8">
             <Plus className="size-4" aria-hidden="true" /> Add menu item
           </Button>
         }
@@ -124,7 +127,7 @@ export default async function AdminNavigationPage({ searchParams }: PageProps<"/
   const menu = NAV_MENUS.find((m) => m === sp.menu) ?? "header";
   return (
     <>
-      <PageHeader title="Navigation" description="The links in the site header and footer. Header items with sub-items open as a dropdown." />
+      <PageHeader title="Navigation" description="The links in the site header and footer. Header items with sub-items open as a dropdown. The header shows the English label on both sites; the footer follows the reader's language." />
       <nav aria-label="Menus" className="flex gap-1 border-b">
         {NAV_MENUS.map((m) => (
           <Link

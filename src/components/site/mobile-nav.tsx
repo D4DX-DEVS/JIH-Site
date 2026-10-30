@@ -1,17 +1,21 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight, ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, Menu } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useI18n } from "@/components/i18n/i18n-provider";
+import Link from "@/components/i18n/link";
+import { langAttr } from "@/lib/i18n/config";
 import type { NavLink } from "@/lib/data/navigation";
 import { cn } from "@/lib/utils";
-import { isActive } from "./desktop-nav";
+import { isActive, isExternal } from "./nav-paths";
 
-export function MobileNav({ items }: { items: NavLink[] }) {
+/** The menu button and sheet: below xl, and on wider screens when the full menu does not fit (`showOnDesktop`). */
+export function MobileNav({ items, showOnDesktop = false }: { items: NavLink[]; showOnDesktop?: boolean }) {
+  const { locale, t } = useI18n();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
   const pathname = usePathname();
@@ -25,28 +29,32 @@ export function MobileNav({ items }: { items: NavLink[] }) {
     );
 
   const renderLink = (item: NavLink, nested = false) =>
-    /^https?:|^\/media\//.test(item.url) ? (
-      <a href={item.url} className={linkClass(nested)} onClick={close} rel="noopener">
+    isExternal(item.url) ? (
+      <a href={item.url} lang={langAttr(item.lang, locale)} className={linkClass(nested)} onClick={close} rel="noopener">
         {item.label}
       </a>
     ) : (
-      <Link href={item.url || "/"} className={linkClass(nested)} onClick={close} data-active={isActive(pathname, item.url)}>
+      <Link href={item.url || "/"} lang={langAttr(item.lang, locale)} className={linkClass(nested)} onClick={close} data-active={isActive(pathname, item.url)}>
         {item.label}
       </Link>
     );
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="inline-flex size-11 items-center justify-center rounded-full text-ink transition-colors hover:bg-mist active:scale-95 xl:hidden" aria-label="Open menu">
+      <SheetTrigger
+        className={cn("inline-flex size-11 items-center justify-center rounded-full text-ink transition-colors hover:bg-mist active:scale-95", !showOnDesktop && "xl:hidden")}
+        title={t.header.menuTrigger}
+      >
         <Menu className="size-6" aria-hidden="true" />
+        <span className="sr-only">{t.header.menuTrigger}</span>
       </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-sm flex-col gap-0 p-0">
+      <SheetContent side="right" closeLabel={t.common.close} className="flex w-full max-w-sm flex-col gap-0 p-0">
         <SheetHeader className="border-b px-5 py-4">
-          <SheetTitle className="sr-only">Menu</SheetTitle>
+          <SheetTitle className="sr-only">{t.header.mobileMenuLabel}</SheetTitle>
           <Image src="/brand/logo-blue.png" alt="" width={768} height={225} className="h-9 w-auto self-start" />
-          <SheetDescription className="sr-only">Site navigation</SheetDescription>
+          <SheetDescription className="sr-only">{t.header.mobileMenuDescription}</SheetDescription>
         </SheetHeader>
-        <nav aria-label="Mobile" className="flex-1 overflow-y-auto px-3 py-4">
+        <nav aria-label={t.header.mainNav} className="flex-1 overflow-y-auto px-3 py-4">
           <ul className="space-y-1">
             {items.map((item, i) => (
               <motion.li
@@ -59,6 +67,7 @@ export function MobileNav({ items }: { items: NavLink[] }) {
                   <>
                     <button
                       type="button"
+                      lang={langAttr(item.lang, locale)}
                       aria-expanded={expanded === item.id}
                       onClick={() => setExpanded((e) => (e === item.id ? null : item.id))}
                       className="flex min-h-12 w-full items-center justify-between rounded-xl px-3 text-left text-lg font-semibold text-ink transition-colors hover:bg-mist"
@@ -81,15 +90,6 @@ export function MobileNav({ items }: { items: NavLink[] }) {
             ))}
           </ul>
         </nav>
-        <div className="border-t p-4">
-          <Link
-            href="/contact/"
-            onClick={close}
-            className="group flex min-h-12 items-center justify-center gap-2 rounded-full bg-maroon px-5 font-semibold text-white transition-colors hover:bg-maroon-deep"
-          >
-            Contact us <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-          </Link>
-        </div>
       </SheetContent>
     </Sheet>
   );

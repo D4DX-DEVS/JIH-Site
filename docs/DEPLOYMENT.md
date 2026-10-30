@@ -32,7 +32,7 @@ Nothing in this guide has been run against the production Cloudflare account. Ea
 
 1. **Check access** (read-only): `npx wrangler whoami`, `npx wrangler d1 list`, `npx wrangler r2 bucket list`. Confirm that `jih` appears in both lists and that the D1 id matches `wrangler.production.jsonc`.
 2. **Schema** (**Approval**): `npx wrangler d1 migrations apply DB --remote --config wrangler.production.jsonc`.
-3. **Content and media** (**Approval**): `npm run migrate:import -- --remote --config wrangler.production.jsonc --yes-i-have-approval`. The import is idempotent: it upserts by WordPress id and skips R2 objects whose sha256 already matches. Re-running it does not duplicate anything and does not overwrite admin edits unless `--force` is passed.
+3. **Content and media** (**Approval**): `npm run migrate:import -- --remote --config wrangler.production.jsonc --yes-i-have-approval`. The import is idempotent: it upserts by WordPress id and skips R2 objects whose sha256 already matches. Re-running it does not duplicate anything and does not overwrite admin edits unless `--force` is passed. Its last step separates English from Malayalam into the `…En` columns. If production was imported before migration `0001_bilingual_content`, run step 2 and then `npm run migrate:split-languages -- --remote --config wrangler.production.jsonc --yes-i-have-approval` instead of re-importing (`--dry-run` lists the changes first).
 4. **Verify** (read-only, but it reads production): `npm run migrate:verify -- --remote --config wrangler.production.jsonc --yes-i-have-approval`. This rewrites `docs/MIGRATION_REPORT.md` with production numbers. Expect the 23 media files that 404 on the WordPress server to be listed as failed.
 5. **Secrets** (**Approval**): set `ADMIN_EMAIL` and `ADMIN_PASSWORD_HASH` as in the table above.
 6. **Build**: `npm run cf:build`, with `NEXT_PUBLIC_SITE_URL=https://jihkerala.org` in the environment. Always use the npm script, not `opennextjs-cloudflare build` on its own: the script also applies `scripts/patch-worker.mjs`, without which every page hangs on Workers. Check that the output ends with `patch-worker: skipped Next.js fast setImmediate install for workerd`.
@@ -47,7 +47,8 @@ Nothing in this guide has been run against the production Cloudflare account. Ea
 - Admin → Settings → Contact: the email copied from WordPress used the staging hostname. The import now writes `hiracenter@jihkerala.org`; a database imported before that change still holds the old address, so set it there (or run `npx wrangler d1 execute DB --remote --command "UPDATE settings SET value = json_set(value, '$.email', 'hiracenter@jihkerala.org') WHERE key = 'contact';"`).
 - Admin → Settings → Social: the Facebook link from WordPress is broken. Enter the real page URL.
 - Admin → Pages → `/medical/`: the body text contains the staging hostname email.
-- 56 media items are private on WordPress, and the TranslatePress `/ml/` strings were not exported. Both need a WordPress admin export if they are wanted.
+- 56 media items are private on WordPress and need a WordPress admin export if they are wanted.
+- Translations: most news posts exist only in Malayalam, and some pages, menu items, categories, leader roles and settings only in English. The site shows the other language with a notice until an editor fills the missing language in the admin (each editor has മലയാളം / English tabs).
 
 ## Rollback
 

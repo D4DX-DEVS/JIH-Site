@@ -22,7 +22,7 @@ export async function saveGalleryAction(id: number | null, values: GalleryFormVa
   }
   const data = parsed.data;
   const db = await getDb();
-  const slug = slugOrTitle(data.slug, data.title);
+  const slug = slugOrTitle(data.slug, data.title || data.titleEn);
   if (!slug) return { ok: false, error: "Slug is required", fieldErrors: { slug: "Slug is required" } };
   const [taken] = await db
     .select({ id: galleries.id })
@@ -47,8 +47,10 @@ export async function saveGalleryAction(id: number | null, values: GalleryFormVa
   const publishedAt = data.publishedAt ? new Date(data.publishedAt).toISOString() : data.status === "published" ? now : null;
   const row = {
     title: data.title,
+    titleEn: data.titleEn,
     slug,
     description: data.description,
+    descriptionEn: data.descriptionEn,
     categoryId: data.categoryId,
     // Gallery cards on the public index show the cover only, so fall back to the first image.
     coverMediaId: data.coverMediaId ?? imageIds[0] ?? null,
@@ -74,7 +76,8 @@ export async function saveGalleryAction(id: number | null, values: GalleryFormVa
     await db.insert(galleryImages).values({ galleryId: galleryId!, mediaId, sortOrder: index });
   }
 
-  await logActivity(session.actor, id ? "update" : "create", "gallery", galleryId!, `${id ? "Updated" : "Created"} gallery “${data.title}” (${imageIds.length} images)`);
+  const title = data.title || data.titleEn;
+  await logActivity(session.actor, id ? "update" : "create", "gallery", galleryId!, `${id ? "Updated" : "Created"} gallery “${title}” (${imageIds.length} images)`);
   refreshPublic("galleries", `gallery:${slug}`, ...(previousSlug && previousSlug !== slug ? [`gallery:${previousSlug}` as const] : []));
   return { ok: true, id: galleryId!, slug };
 }
@@ -82,9 +85,10 @@ export async function saveGalleryAction(id: number | null, values: GalleryFormVa
 export async function deleteGalleryAction(id: number): Promise<ActionResult> {
   const session = await requireAdmin();
   const db = await getDb();
-  const [row] = await db.delete(galleries).where(eq(galleries.id, id)).returning({ title: galleries.title, slug: galleries.slug });
+  const [row] = await db.delete(galleries).where(eq(galleries.id, id)).returning({ title: galleries.title, titleEn: galleries.titleEn, slug: galleries.slug });
   if (!row) return { ok: false, error: "Gallery not found" };
-  await logActivity(session.actor, "delete", "gallery", id, `Deleted gallery “${row.title}”`);
+  const title = row.title || row.titleEn;
+  await logActivity(session.actor, "delete", "gallery", id, `Deleted gallery “${title}”`);
   refreshPublic("galleries", `gallery:${row.slug}`);
   return { ok: true, message: "Gallery deleted" };
 }

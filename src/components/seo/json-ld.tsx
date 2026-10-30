@@ -1,4 +1,5 @@
 import type { SiteSettings } from "@/lib/data/settings";
+import type { Locale } from "@/lib/i18n/config";
 import { mediaUrl } from "@/lib/media-url";
 import { absoluteUrl, siteUrl } from "@/lib/site-url";
 
@@ -38,9 +39,11 @@ interface ArticleJsonLdProps {
   publishedAt: string | null;
   updatedAt: string;
   publisher: string;
+  /** Language of the article text. */
+  lang: Locale;
 }
 
-export function ArticleJsonLd({ url, title, description, image, publishedAt, updatedAt, publisher }: ArticleJsonLdProps) {
+export function ArticleJsonLd({ url, title, description, image, publishedAt, updatedAt, publisher, lang }: ArticleJsonLdProps) {
   return (
     <JsonLd
       data={{
@@ -52,7 +55,7 @@ export function ArticleJsonLd({ url, title, description, image, publishedAt, upd
         image: image ? [image] : undefined,
         datePublished: publishedAt ?? undefined,
         dateModified: updatedAt,
-        inLanguage: "ml",
+        inLanguage: lang,
         publisher: { "@type": "Organization", name: publisher, logo: { "@type": "ImageObject", url: absoluteUrl("/brand/logo-blue.png") } },
       }}
     />

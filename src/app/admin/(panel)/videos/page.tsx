@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { and, asc, desc, eq, sql, type SQL } from "drizzle-orm";
 import { AdminEmptyState, PageHeader, StatusBadge, TableSkeleton } from "@/components/admin/admin-ui";
+import { LanguageBadge } from "@/components/admin/language-badge";
 import { DataPagination } from "@/components/admin/data-pagination";
 import { ListToolbar } from "@/components/admin/list-toolbar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -25,12 +26,16 @@ async function VideosTable({ params }: { params: AdminListParams<Sort> }) {
   const db = await getDb();
   const where: SQL[] = [];
   if (params.status) where.push(eq(videos.status, params.status as "draft" | "published"));
-  if (params.q) where.push(sql`lower(${videos.title}) like ${likePattern(params.q)} escape '\\'`);
+  if (params.q) {
+    where.push(
+      sql`(lower(${videos.title}) like ${likePattern(params.q)} escape '\\') or (lower(${videos.titleEn}) like ${likePattern(params.q)} escape '\\')`
+    );
+  }
   const condition = where.length ? and(...where) : undefined;
   const orderBy = params.order === "asc" ? asc(SORT_COLUMNS[params.sort]) : desc(SORT_COLUMNS[params.sort]);
   const [rows, [{ total }]] = await Promise.all([
     db
-      .select({ id: videos.id, title: videos.title, slug: videos.slug, youtubeId: videos.youtubeId, status: videos.status, publishedAt: videos.publishedAt })
+      .select({ id: videos.id, title: videos.title, titleEn: videos.titleEn, slug: videos.slug, youtubeId: videos.youtubeId, status: videos.status, publishedAt: videos.publishedAt })
       .from(videos)
       .where(condition)
       .orderBy(orderBy, desc(videos.id))
@@ -50,7 +55,7 @@ async function VideosTable({ params }: { params: AdminListParams<Sort> }) {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div className="admin-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -70,12 +75,17 @@ async function VideosTable({ params }: { params: AdminListParams<Sort> }) {
                   <img src={youtubeThumb(v.youtubeId)} alt="" loading="lazy" className="aspect-video w-20 rounded-md bg-muted object-cover" />
                 </TableCell>
                 <TableCell className="max-w-0 whitespace-normal">
-                  <Link href={`/admin/videos/${v.id}/`} className="line-clamp-2 font-medium hover:underline">
-                    {v.title}
-                  </Link>
-                  <a href={routes.video(v.slug)} target="_blank" rel="noopener" className="text-xs text-muted-foreground hover:underline">
-                    View on site
-                  </a>
+                  <div className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <Link href={`/admin/videos/${v.id}/`} className="line-clamp-2 font-medium hover:underline">
+                        {v.title || v.titleEn}
+                      </Link>
+                      <a href={routes.video(v.slug)} target="_blank" rel="noopener" className="text-xs text-muted-foreground hover:underline">
+                        View on site
+                      </a>
+                    </div>
+                    <LanguageBadge ml={!!v.title} en={!!v.titleEn} />
+                  </div>
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={v.status} />

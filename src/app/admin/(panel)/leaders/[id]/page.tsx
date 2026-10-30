@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { ChevronLeft } from "lucide-react";
 import { getDb } from "@/db/client";
 import { LEADER_GROUPS, leaders } from "@/db/schema";
-import { LEADER_GROUP_TITLES } from "@/app/(site)/_components/templates/leaders-page";
+import { LEADER_GROUP_TITLES } from "@/app/[lang]/_components/templates/leaders-page";
 import { pickerMedia } from "@/lib/admin/lookups";
 import { requireAdmin } from "@/lib/auth/session";
 import { LeaderForm } from "../leader-form";
@@ -31,7 +31,7 @@ export default async function EditLeaderPage({ params }: PageProps<"/admin/leade
         <Link href="/admin/leaders/" className="inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="size-4" aria-hidden="true" /> Leaders
         </Link>
-        <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{leader ? "Edit leader" : "Add leader"}</h1>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">{leader ? "Edit leader" : "Add leader"}</h1>
       </div>
       <LeaderForm
         id={id}
@@ -39,10 +39,13 @@ export default async function EditLeaderPage({ params }: PageProps<"/admin/leade
         groups={LEADER_GROUPS.map((g) => ({ value: g, label: LEADER_GROUP_TITLES[g] }))}
         initial={{
           name: leader?.name ?? "",
+          nameEn: leader?.nameEn ?? "",
           slug: leader?.slug ?? "",
           roleTitle: leader?.roleTitle ?? "",
+          roleTitleEn: leader?.roleTitleEn ?? "",
           groupKey: leader?.groupKey ?? "shoora",
           bioHtml: leader?.bioHtml ?? "",
+          bioHtmlEn: leader?.bioHtmlEn ?? "",
           photoMediaId: leader?.photoMediaId ?? null,
           sortOrder: leader?.sortOrder ?? 0,
           status: leader?.status ?? "published",

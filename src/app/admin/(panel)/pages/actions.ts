@@ -21,20 +21,25 @@ export async function savePageAction(id: number | null, values: PageFormValues):
   }
   const data = parsed.data;
   const db = await getDb();
-  const slug = slugOrTitle(data.slug, slugify(data.title));
+  const slug = slugOrTitle(data.slug, slugify(data.title || data.titleEn));
   const slugError = await rootSlugError(db, slug, { table: "pages", id: id ?? undefined });
   if (slugError) return { ok: false, error: slugError, fieldErrors: { slug: slugError } };
 
   const contentHtml = sanitizeRichText(data.contentHtml);
+  const contentHtmlEn = sanitizeRichText(data.contentHtmlEn);
   const text = htmlToText(contentHtml);
+  const textEn = htmlToText(contentHtmlEn);
   const now = new Date().toISOString();
   const row = {
     title: data.title,
+    titleEn: data.titleEn,
     slug,
     status: data.status,
     summary: data.summary,
+    summaryEn: data.summaryEn,
     contentHtml,
-    searchText: `${data.title} ${data.summary} ${text}`.toLowerCase(),
+    contentHtmlEn,
+    searchText: `${data.title} ${data.titleEn} ${data.summary} ${data.summaryEn} ${text} ${textEn}`.toLowerCase(),
     featuredMediaId: data.featuredMediaId,
     template: data.template,
     section: data.section,
@@ -43,6 +48,8 @@ export async function savePageAction(id: number | null, values: PageFormValues):
     sortOrder: data.sortOrder,
     seoTitle: data.seoTitle,
     seoDescription: data.seoDescription,
+    seoTitleEn: data.seoTitleEn,
+    seoDescriptionEn: data.seoDescriptionEn,
     updatedAt: now,
   };
 
@@ -64,7 +71,7 @@ export async function savePageAction(id: number | null, values: PageFormValues):
     pageId = created.id;
   }
 
-  await logActivity(session.actor, id ? "update" : "create", "page", pageId!, `${id ? "Updated" : "Created"} page “${data.title}”`);
+  await logActivity(session.actor, id ? "update" : "create", "page", pageId!, `${id ? "Updated" : "Created"} page “${data.title || data.titleEn}”`);
   refreshPublic("pages", `page:${slug}`, ...(previousSlug && previousSlug !== slug ? [`page:${previousSlug}` as const] : []));
   return { ok: true, id: pageId!, slug };
 }
@@ -72,16 +79,17 @@ export async function savePageAction(id: number | null, values: PageFormValues):
 export async function deletePageAction(id: number): Promise<ActionResult> {
   const session = await requireAdmin();
   const db = await getDb();
-  const [existing] = await db.select({ title: pages.title, slug: pages.slug, template: pages.template }).from(pages).where(eq(pages.id, id)).limit(1);
+  const [existing] = await db.select({ title: pages.title, titleEn: pages.titleEn, slug: pages.slug, template: pages.template }).from(pages).where(eq(pages.id, id)).limit(1);
   if (!existing) return { ok: false, error: "Page not found" };
   if (existing.template !== "default") {
     return {
       ok: false,
-      error: `“${existing.title}” uses the ${existing.template} template and drives a section of the site (news, leaders, contact or a hub). Set it to Draft instead of deleting it.`,
+      error: `“${existing.title || existing.titleEn}” uses the ${existing.template} template and drives a section of the site (news, leaders, contact or a hub). Set it to Draft instead of deleting it.`,
     };
   }
   await db.delete(pages).where(eq(pages.id, id));
-  await logActivity(session.actor, "delete", "page", id, `Deleted page “${existing.title}”`);
+  const title = existing.title || existing.titleEn;
+  await logActivity(session.actor, "delete", "page", id, `Deleted page “${title}”`);
   refreshPublic("pages", `page:${existing.slug}`);
   return { ok: true, message: "Page deleted" };
 }

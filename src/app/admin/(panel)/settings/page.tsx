@@ -16,13 +16,13 @@ const GROUPS: Array<{ key: AdminSettingsKey; title: string; description: string;
   {
     key: "site",
     title: "Site details",
-    description: "The organisation’s name as the site shows it.",
+    description: "The organisation’s name as the site shows it, in Malayalam and English.",
     fields: [
-      { name: "name", label: "Full name", kind: "text", hint: "Used in page titles and structured data." },
-      { name: "shortName", label: "Short name", kind: "text", hint: "Used where space is tight, e.g. the footer." },
-      { name: "tagline", label: "Tagline", kind: "textarea", hint: "Shown on the homepage.", dir: "auto" },
+      { name: "name", label: "Full name", kind: "text", hint: "Used in page titles and structured data.", bilingual: true },
+      { name: "shortName", label: "Short name", kind: "text", hint: "Used where space is tight, e.g. the footer.", bilingual: true },
+      { name: "tagline", label: "Tagline", kind: "textarea", hint: "Shown on the homepage.", dir: "auto", bilingual: true },
       { name: "heroBannerMediaId", label: "Homepage banner", kind: "image", hint: "Shown in full, never cropped, at the top of the homepage. A wide image of about 2560×1250 works best. Without one, event photographs are shown." },
-      { name: "copyright", label: "Copyright holder", kind: "text", hint: "Footer line; the year is added automatically." },
+      { name: "copyright", label: "Copyright holder", kind: "text", hint: "Footer line; the year is added automatically.", bilingual: true },
     ],
   },
   {
@@ -30,8 +30,8 @@ const GROUPS: Array<{ key: AdminSettingsKey; title: string; description: string;
     title: "Search engines and sharing",
     description: "Defaults for the homepage. Each post and page has its own SEO fields.",
     fields: [
-      { name: "homeTitle", label: "Homepage title", kind: "text", hint: "Leave empty to use the full name.", dir: "auto" },
-      { name: "defaultDescription", label: "Homepage description", kind: "textarea", hint: "About 150 characters works best in search results.", dir: "auto" },
+      { name: "homeTitle", label: "Homepage title", kind: "text", hint: "Leave empty to use the full name.", dir: "auto", bilingual: true },
+      { name: "defaultDescription", label: "Homepage description", kind: "textarea", hint: "About 150 characters works best in search results.", dir: "auto", bilingual: true },
       { name: "ogImageMediaId", label: "Sharing image", kind: "image", hint: "Shown when the homepage is shared on social media. 1200×630 works best." },
     ],
   },
@@ -40,9 +40,9 @@ const GROUPS: Array<{ key: AdminSettingsKey; title: string; description: string;
     title: "Contact details",
     description: "Shown on the contact page and in the footer.",
     fields: [
-      { name: "organisation", label: "Organisation", kind: "text", dir: "auto" },
-      { name: "postBox", label: "Post box", kind: "text" },
-      { name: "address", label: "Address", kind: "textarea", dir: "auto" },
+      { name: "organisation", label: "Organisation", kind: "text", dir: "auto", bilingual: true },
+      { name: "postBox", label: "Post box", kind: "text", bilingual: true },
+      { name: "address", label: "Address", kind: "textarea", dir: "auto", bilingual: true },
       { name: "phone", label: "Phone", kind: "tel" },
       { name: "email", label: "Email", kind: "email" },
       { name: "website", label: "Website", kind: "url" },
@@ -72,7 +72,8 @@ async function SettingsForms() {
         GROUPS.map(async (g) => {
           const raw = (stored[g.key] ?? {}) as Record<string, unknown>;
           // Stored values are shown as they are, so an invalid legacy value surfaces as a field error on save.
-          const initial = Object.fromEntries(g.fields.map((f) => [f.name, raw[f.name] ?? (f.kind === "image" ? null : "")]));
+          const names = g.fields.flatMap((f) => (f.bilingual ? [f.name, `${f.name}En`] : [f.name]));
+          const initial = Object.fromEntries(names.map((name) => [name, raw[name] ?? (name.endsWith("MediaId") ? null : "")]));
           const images = Object.fromEntries(
             await Promise.all(g.fields.filter((f) => f.kind === "image").map(async (f) => [f.name, await pickerMedia(db, initial[f.name] as number | null)] as const)),
           );
@@ -93,7 +94,7 @@ function SettingsSkeleton() {
             {g.fields.map((f) => (
               <div key={f.name} className="space-y-2">
                 <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-11 w-full" />
+                <Skeleton className="h-9 w-full" />
               </div>
             ))}
           </div>

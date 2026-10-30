@@ -34,7 +34,7 @@ export default async function EditPostPage({ params }: PageProps<"/admin/posts/[
         <Link href="/admin/posts/" className="inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="size-4" aria-hidden="true" /> Posts
         </Link>
-        <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{post ? "Edit post" : "New post"}</h1>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">{post ? "Edit post" : "New post"}</h1>
       </div>
       <PostForm
         id={id}
@@ -42,16 +42,21 @@ export default async function EditPostPage({ params }: PageProps<"/admin/posts/[
         categories={cats}
         initial={{
           title: post?.title ?? "",
+          titleEn: post?.titleEn ?? "",
           slug: post?.slug ?? "",
           status: post?.status ?? "draft",
           publishedAt: post?.publishedAt ?? "",
           excerpt: post?.excerpt ?? "",
+          excerptEn: post?.excerptEn ?? "",
           contentHtml: post?.contentHtml ?? "",
+          contentHtmlEn: post?.contentHtmlEn ?? "",
           featuredMediaId: post?.featuredMediaId ?? null,
           categoryIds: selected.map((s) => s.id),
           isFeatured: post?.isFeatured ?? false,
           seoTitle: post?.seoTitle ?? "",
           seoDescription: post?.seoDescription ?? "",
+          seoTitleEn: post?.seoTitleEn ?? "",
+          seoDescriptionEn: post?.seoDescriptionEn ?? "",
         }}
       />
     </>

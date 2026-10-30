@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { FormDialog, applyFormResult } from "@/components/admin/form-dialog";
 import { Field, describedBy } from "@/components/admin/form-bits";
+import { LanguageTabs, LanguageTab } from "@/components/admin/language-tabs";
 import { MediaField } from "@/components/admin/media-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +39,9 @@ function DownloadForm({ download, nextSortOrder, onDone }: { download?: Download
     resolver: zodResolver(downloadSchema),
     defaultValues: {
       title: download?.title ?? "",
+      titleEn: download?.titleEn ?? "",
       description: download?.description ?? "",
+      descriptionEn: download?.descriptionEn ?? "",
       mediaId: download?.mediaId,
       sortOrder: download?.sortOrder ?? nextSortOrder,
       active: download?.active ?? true,
@@ -57,12 +60,28 @@ function DownloadForm({ download, nextSortOrder, onDone }: { download?: Download
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
-      <Field id="download-title" label="Title" error={errors.title?.message}>
-        <Input id="download-title" className="h-11" aria-invalid={!!errors.title} aria-describedby={describedBy("download-title", errors.title?.message)} {...form.register("title")} />
-      </Field>
-      <Field id="download-description" label="Description" error={errors.description?.message}>
-        <Textarea id="download-description" rows={2} {...form.register("description")} />
-      </Field>
+      <LanguageTabs>
+        <LanguageTab value="ml">
+          <div className="space-y-4">
+            <Field id="download-title" label="Title" error={errors.title?.message}>
+              <Input id="download-title" className="h-9" aria-invalid={!!errors.title} aria-describedby={describedBy("download-title", errors.title?.message)} {...form.register("title")} />
+            </Field>
+            <Field id="download-description" label="Description" error={errors.description?.message}>
+              <Textarea id="download-description" rows={2} {...form.register("description")} />
+            </Field>
+          </div>
+        </LanguageTab>
+        <LanguageTab value="en">
+          <div className="space-y-4">
+            <Field id="download-titleEn" label="Title" error={errors.titleEn?.message}>
+              <Input id="download-titleEn" className="h-9" aria-invalid={!!errors.titleEn} aria-describedby={describedBy("download-titleEn", errors.titleEn?.message)} {...form.register("titleEn")} />
+            </Field>
+            <Field id="download-descriptionEn" label="Description" error={errors.descriptionEn?.message}>
+              <Textarea id="download-descriptionEn" rows={2} {...form.register("descriptionEn")} />
+            </Field>
+          </div>
+        </LanguageTab>
+      </LanguageTabs>
       <div className="space-y-2">
         <span className="text-sm font-medium">File</span>
         <Controller
@@ -97,10 +116,10 @@ function DownloadForm({ download, nextSortOrder, onDone }: { download?: Download
         )}
       />
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" className="h-11 sm:h-9" onClick={onDone} disabled={pending}>
+        <Button type="button" variant="outline" className="h-9 sm:h-8" onClick={onDone} disabled={pending}>
           Cancel
         </Button>
-        <Button type="submit" className="h-11 sm:h-9" disabled={pending}>
+        <Button type="submit" className="h-9 sm:h-8" disabled={pending}>
           {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
           {pending ? "Saving…" : "Save"}
         </Button>

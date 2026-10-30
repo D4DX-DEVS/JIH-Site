@@ -49,10 +49,10 @@ function RedirectForm({ redirect, onDone }: { redirect?: { id: number } & Redire
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <Field id="redirect-from" label="Old address" error={errors.fromPath?.message} hint="The path only, e.g. /old-page/ — leave out the domain.">
-        <Input id="redirect-from" className="h-11" placeholder="/old-page/" aria-invalid={!!errors.fromPath} aria-describedby={describedBy("redirect-from", errors.fromPath?.message, "x")} {...form.register("fromPath")} />
+        <Input id="redirect-from" className="h-9" placeholder="/old-page/" aria-invalid={!!errors.fromPath} aria-describedby={describedBy("redirect-from", errors.fromPath?.message, "x")} {...form.register("fromPath")} />
       </Field>
       <Field id="redirect-to" label="New address" error={errors.toPath?.message} hint="A path on this site like /news/, or a full https:// address.">
-        <Input id="redirect-to" className="h-11" placeholder="/news/" aria-invalid={!!errors.toPath} aria-describedby={describedBy("redirect-to", errors.toPath?.message, "x")} {...form.register("toPath")} />
+        <Input id="redirect-to" className="h-9" placeholder="/news/" aria-invalid={!!errors.toPath} aria-describedby={describedBy("redirect-to", errors.toPath?.message, "x")} {...form.register("toPath")} />
       </Field>
       <Field id="redirect-code" label="Type" error={errors.statusCode?.message} hint="Permanent (sent as 308) tells search engines to index the new address. Use temporary (307) only if the old address will come back.">
         <Controller
@@ -60,7 +60,7 @@ function RedirectForm({ redirect, onDone }: { redirect?: { id: number } & Redire
           name="statusCode"
           render={({ field }) => (
             <Select value={String(field.value)} onValueChange={(v) => field.onChange(Number(v))}>
-              <SelectTrigger id="redirect-code" className="h-11 w-full" aria-describedby="redirect-code-hint">
+              <SelectTrigger id="redirect-code" className="h-9 w-full" aria-describedby="redirect-code-hint">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -75,10 +75,10 @@ function RedirectForm({ redirect, onDone }: { redirect?: { id: number } & Redire
         />
       </Field>
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" className="h-11 sm:h-9" onClick={onDone} disabled={pending}>
+        <Button type="button" variant="outline" className="h-9 sm:h-8" onClick={onDone} disabled={pending}>
           Cancel
         </Button>
-        <Button type="submit" className="h-11 sm:h-9" disabled={pending}>
+        <Button type="submit" className="h-9 sm:h-8" disabled={pending}>
           {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
           {pending ? "Saving…" : "Save"}
         </Button>

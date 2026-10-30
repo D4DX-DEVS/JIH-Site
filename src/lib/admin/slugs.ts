@@ -7,7 +7,7 @@ import { slugify } from "@/lib/slug";
 /** Top-level paths owned by routes; a page or post may not take them. */
 const RESERVED = new Set([
   "admin", "media", "category", "tag", "search", "feed", "leadership", "image-gallery", "image-category",
-  "video-gallery", "downloads", "sitemap.xml", "robots.txt", "wp-content", "wp-admin", "ml", "blog", "_next",
+  "video-gallery", "downloads", "sitemap.xml", "robots.txt", "wp-content", "wp-admin", "ml", "en", "blog", "_next",
 ]);
 
 /**

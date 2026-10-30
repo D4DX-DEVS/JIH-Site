@@ -55,7 +55,7 @@ async function PostersTable({ params }: { params: AdminListParams<Sort> }) {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div className="admin-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -88,9 +88,9 @@ async function PostersTable({ params }: { params: AdminListParams<Sort> }) {
                   <TableCell>
                     <div className="flex justify-end gap-1">
                       <PosterDialog
-                        poster={{ id: p.id, image, mediaId: p.mediaId, title: p.title, linkUrl: p.linkUrl, sortOrder: p.sortOrder, active: p.active }}
+                        poster={{ id: p.id, image, mediaId: p.mediaId, title: p.title, titleEn: p.titleEn, linkUrl: p.linkUrl, sortOrder: p.sortOrder, active: p.active }}
                         trigger={
-                          <Button variant="ghost" size="icon" className="size-11 sm:size-9" aria-label={`Edit ${name}`}>
+                          <Button variant="ghost" size="icon" className="size-9 sm:size-8" aria-label={`Edit ${name}`}>
                             <Pencil className="size-4" aria-hidden="true" />
                           </Button>
                         }
@@ -126,7 +126,7 @@ async function AddPosterButton() {
     <PosterDialog
       nextSortOrder={(max ?? -1) + 1}
       trigger={
-        <Button className="h-11 sm:h-9">
+        <Button className="h-9 sm:h-8">
           <Plus className="size-4" aria-hidden="true" /> Add poster
         </Button>
       }
@@ -141,7 +141,7 @@ export default async function AdminPostersPage({ searchParams }: PageProps<"/adm
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">Posters</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">Posters</h1>
           <p className="mt-1 text-sm text-muted-foreground">Campaign posters shown on the homepage.</p>
         </div>
         <AddPosterButton />

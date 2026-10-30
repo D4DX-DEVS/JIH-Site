@@ -93,7 +93,7 @@ describe("redirect scope", () => {
       readdirSync(dir, { withFileTypes: true })
         .filter((d) => d.isDirectory() && !/^[_([]/.test(d.name))
         .map((d) => d.name);
-    expect([...folders("src/app"), ...folders("src/app/(site)")].filter((name) => !known.has(name))).toEqual([]);
+    expect([...folders("src/app"), ...folders("src/app/[lang]")].filter((name) => !known.has(name))).toEqual([]);
 
     const served = readdirSync("src/app")
       .map((name) => name.replace(/^robots\.ts$/, "robots.txt").replace(/^sitemap\.ts$/, "sitemap.xml"))
@@ -145,6 +145,23 @@ describe("edge decisions", () => {
   it("fails open when D1 errors or a stored target is unusable", async () => {
     expect(await routeAtEdge(get("/old/"), stubDb(new Error("D1 unavailable")).db)).toEqual({ kind: "render", notFound: false });
     expect(await routeAtEdge(get("/old/"), stubDb({ hasContent: 0, toPath: "http://", statusCode: 301 }).db)).toEqual({ kind: "render", notFound: false });
+  });
+
+  it("applies the same rules to English addresses and keeps their redirects in English", async () => {
+    const moved = stubDb({ hasContent: 0, toPath: "/new-name/", statusCode: 301 });
+    const decision = await routeAtEdge(get("/en/old-name/"), moved.db);
+    expect(decision.kind === "respond" && decision.response.headers.get("location")).toBe("/en/new-name/");
+    expect(moved.bound[0].slice(0, 2)).toEqual(["/old-name/", "old-name"]);
+
+    const file = stubDb({ hasContent: 0, toPath: "/media/uploads/a.pdf", statusCode: 301 });
+    const toFile = await routeAtEdge(get("/en/a/"), file.db);
+    expect(toFile.kind === "respond" && toFile.response.headers.get("location")).toBe("/media/uploads/a.pdf");
+
+    expect(await routeAtEdge(get("/en/no-such-page/"), stubDb(MISSING).db)).toEqual({ kind: "render", notFound: true });
+    const home = stubDb(null);
+    expect(await routeAtEdge(get("/en/"), home.db)).toEqual({ kind: "render", notFound: false });
+    expect(await routeAtEdge(get("/en/news/page/2/"), home.db)).toEqual({ kind: "render", notFound: false });
+    expect(home.bound).toHaveLength(0);
   });
 
   it("skips the database for built-in routes and non-GET requests", async () => {

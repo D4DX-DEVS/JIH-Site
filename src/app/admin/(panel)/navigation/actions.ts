@@ -33,7 +33,7 @@ export async function saveNavItemAction(id: number | null, values: NavItemFormVa
   if (id) {
     const [updated] = await db
       .update(navItems)
-      .set({ label: data.label, url: data.url, parentId: data.parentId, menu: data.menu, updatedAt: new Date().toISOString() })
+      .set({ label: data.label, labelEn: data.labelEn, url: data.url, parentId: data.parentId, menu: data.menu, updatedAt: new Date().toISOString() })
       .where(eq(navItems.id, id))
       .returning({ id: navItems.id });
     if (!updated) return { ok: false, error: "This menu item no longer exists." };
@@ -42,11 +42,12 @@ export async function saveNavItemAction(id: number | null, values: NavItemFormVa
     const [{ max }] = await db.select({ max: sql<number | null>`max(${navItems.sortOrder})` }).from(navItems).where(and(eq(navItems.menu, data.menu), siblings));
     const [created] = await db
       .insert(navItems)
-      .values({ menu: data.menu, label: data.label, url: data.url, parentId: data.parentId, sortOrder: (max ?? -1) + 1 })
+      .values({ menu: data.menu, label: data.label, labelEn: data.labelEn, url: data.url, parentId: data.parentId, sortOrder: (max ?? -1) + 1 })
       .returning({ id: navItems.id });
     itemId = created.id;
   }
-  await logActivity(session.actor, id ? "update" : "create", "navigation", itemId!, `${id ? "Updated" : "Added"} ${data.menu} menu item “${data.label}”`);
+  const label = data.label || data.labelEn;
+  await logActivity(session.actor, id ? "update" : "create", "navigation", itemId!, `${id ? "Updated" : "Added"} ${data.menu} menu item “${label}”`);
   refreshPublic("navigation");
   return { ok: true, id: itemId!, message: id ? "Menu item saved" : "Menu item added" };
 }

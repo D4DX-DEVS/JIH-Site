@@ -59,7 +59,7 @@ export default async function DashboardPage() {
     db.select({ n: count }).from(pages),
     db.select({ n: count, bytes: sql<number>`coalesce(sum(size_bytes), 0)` }).from(media),
     db.select({ n: count }).from(formSubmissions).where(eq(formSubmissions.status, "new")),
-    db.select({ id: posts.id, title: posts.title, status: posts.status, updatedAt: posts.updatedAt }).from(posts).orderBy(desc(posts.updatedAt)).limit(5),
+    db.select({ id: posts.id, title: posts.title, titleEn: posts.titleEn, status: posts.status, updatedAt: posts.updatedAt }).from(posts).orderBy(desc(posts.updatedAt)).limit(5),
     db.select({ status: migrationItems.status, n: count }).from(migrationItems).groupBy(migrationItems.status),
     db.select({ month, n: count }).from(posts).where(isNotNull(posts.publishedAt)).groupBy(month).orderBy(desc(month)),
   ]);
@@ -90,7 +90,7 @@ export default async function DashboardPage() {
   return (
     <>
       <div>
-        <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">Dashboard</h1>
         <p className="mt-1 text-sm text-muted-foreground">{today.format(new Date())}</p>
       </div>
 
@@ -214,7 +214,7 @@ export default async function DashboardPage() {
                 <tr key={p.id} className="border-t">
                   <td className="py-3 pr-4">
                     <Link href={`/admin/posts/${p.id}/`} className="line-clamp-1 font-medium hover:text-primary">
-                      {p.title}
+                      {p.title || p.titleEn}
                     </Link>
                   </td>
                   <td className="py-3 pr-4">
@@ -227,7 +227,7 @@ export default async function DashboardPage() {
           </table>
         </Panel>
 
-        <section className="flex flex-col rounded-2xl bg-[var(--admin-rail)] p-5 text-white sm:p-6">
+        <section className="flex flex-col rounded-xl bg-[var(--admin-rail)] p-5 text-white sm:p-6">
           <h2 className="font-heading text-lg font-semibold">Quick actions</h2>
           <p className="mt-1 text-sm text-white/65">Add something new to the site.</p>
           <ul className="-mx-3 mt-4 space-y-1">

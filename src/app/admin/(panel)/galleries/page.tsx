@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { and, asc, desc, eq, sql, type SQL } from "drizzle-orm";
 import { Images } from "lucide-react";
 import { AdminEmptyState, PageHeader, StatusBadge, TableSkeleton } from "@/components/admin/admin-ui";
+import { LanguageBadge } from "@/components/admin/language-badge";
 import { DataPagination } from "@/components/admin/data-pagination";
 import { ListToolbar } from "@/components/admin/list-toolbar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -28,13 +29,17 @@ async function GalleriesTable({ params, category }: { params: AdminListParams<So
   const where: SQL[] = [];
   if (params.status) where.push(eq(galleries.status, params.status as "draft" | "published"));
   if (category) where.push(eq(galleries.categoryId, category));
-  if (params.q) where.push(sql`lower(${galleries.title}) like ${likePattern(params.q)} escape '\\'`);
+  if (params.q) {
+    where.push(
+      sql`(lower(${galleries.title}) like ${likePattern(params.q)} escape '\\') or (lower(${galleries.titleEn}) like ${likePattern(params.q)} escape '\\')`
+    );
+  }
   const condition = where.length ? and(...where) : undefined;
   const orderBy = params.order === "asc" ? asc(SORT_COLUMNS[params.sort]) : desc(SORT_COLUMNS[params.sort]);
   const [rows, [{ total }]] = await Promise.all([
     db
       .select({
-        id: galleries.id, title: galleries.title, slug: galleries.slug, status: galleries.status, publishedAt: galleries.publishedAt, categoryName: galleryCategories.name,
+        id: galleries.id, title: galleries.title, titleEn: galleries.titleEn, slug: galleries.slug, status: galleries.status, publishedAt: galleries.publishedAt, categoryName: galleryCategories.name,
         imageCount: sql<number>`(select count(*) from ${galleryImages} where ${galleryImages.galleryId} = ${galleries.id})`,
         cover: { r2Key: media.r2Key, width: media.width, height: media.height, altText: media.altText, variants: media.variants },
       })
@@ -59,7 +64,7 @@ async function GalleriesTable({ params, category }: { params: AdminListParams<So
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div className="admin-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -87,12 +92,17 @@ async function GalleriesTable({ params, category }: { params: AdminListParams<So
                   )}
                 </TableCell>
                 <TableCell className="max-w-0 whitespace-normal">
-                  <Link href={`/admin/galleries/${g.id}/`} className="line-clamp-2 font-medium hover:underline">
-                    {g.title}
-                  </Link>
-                  <a href={routes.gallery(g.slug)} target="_blank" rel="noopener" className="text-xs text-muted-foreground hover:underline">
-                    View on site
-                  </a>
+                  <div className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <Link href={`/admin/galleries/${g.id}/`} className="line-clamp-2 font-medium hover:underline">
+                        {g.title || g.titleEn}
+                      </Link>
+                      <a href={routes.gallery(g.slug)} target="_blank" rel="noopener" className="text-xs text-muted-foreground hover:underline">
+                        View on site
+                      </a>
+                    </div>
+                    <LanguageBadge ml={!!g.title} en={!!g.titleEn} />
+                  </div>
                 </TableCell>
                 <TableCell className="hidden text-sm md:table-cell">{g.categoryName ?? "None"}</TableCell>
                 <TableCell className="hidden text-sm text-muted-foreground tabular-nums lg:table-cell">{g.imageCount}</TableCell>

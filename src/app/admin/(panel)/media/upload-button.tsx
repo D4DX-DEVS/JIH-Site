@@ -35,7 +35,7 @@ export function UploadButton() {
   return (
     <>
       <input ref={input} id="library-upload" type="file" accept={ACCEPT_ATTRIBUTE} multiple className="sr-only" onChange={(e) => onFiles(e.target.files)} tabIndex={-1} />
-      <Button type="button" className="h-11 sm:h-9" disabled={!!progress} onClick={() => input.current?.click()}>
+      <Button type="button" className="h-9 sm:h-8" disabled={!!progress} onClick={() => input.current?.click()}>
         {progress ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Upload className="size-4" aria-hidden="true" />}
         {progress ? `Uploading ${progress.done + 1} of ${progress.total}…` : "Upload files"}
       </Button>

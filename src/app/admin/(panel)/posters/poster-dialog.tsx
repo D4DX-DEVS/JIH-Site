@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { FormDialog, applyFormResult } from "@/components/admin/form-dialog";
 import { Field, describedBy } from "@/components/admin/form-bits";
+import { LanguageTabs, LanguageTab } from "@/components/admin/language-tabs";
 import { MediaField } from "@/components/admin/media-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ function PosterForm({ poster, nextSortOrder, onDone }: { poster?: PosterDialogPr
     defaultValues: {
       mediaId: poster?.mediaId,
       title: poster?.title ?? "",
+      titleEn: poster?.titleEn ?? "",
       linkUrl: poster?.linkUrl ?? "",
       sortOrder: poster?.sortOrder ?? nextSortOrder,
       active: poster?.active ?? true,
@@ -75,11 +77,24 @@ function PosterForm({ poster, nextSortOrder, onDone }: { poster?: PosterDialogPr
         />
         {errors.mediaId ? <p className="text-sm text-destructive">{errors.mediaId.message}</p> : null}
       </div>
-      <Field id="poster-title" label="Title" error={errors.title?.message} hint="Used as the image’s accessible name. Describe what the poster says.">
-        <Input id="poster-title" className="h-11" aria-describedby={describedBy("poster-title", errors.title?.message, "x")} {...form.register("title")} />
-      </Field>
+      <div className="space-y-2">
+        <span className="text-sm font-medium">Title</span>
+        <span className="text-xs text-muted-foreground">Used as the image’s accessible name. Describe what the poster says.</span>
+        <LanguageTabs>
+          <LanguageTab value="ml">
+            <Field id="poster-title" label="Malayalam" error={errors.title?.message}>
+              <Input id="poster-title" className="h-9" aria-describedby={describedBy("poster-title", errors.title?.message, "x")} {...form.register("title")} />
+            </Field>
+          </LanguageTab>
+          <LanguageTab value="en">
+            <Field id="poster-titleEn" label="English" error={errors.titleEn?.message}>
+              <Input id="poster-titleEn" className="h-9" aria-describedby={describedBy("poster-titleEn", errors.titleEn?.message, "x")} {...form.register("titleEn")} />
+            </Field>
+          </LanguageTab>
+        </LanguageTabs>
+      </div>
       <Field id="poster-link" label="Link (optional)" error={errors.linkUrl?.message} hint="A path like /news/ or a full https:// address.">
-        <Input id="poster-link" className="h-11" inputMode="url" aria-invalid={!!errors.linkUrl} aria-describedby={describedBy("poster-link", errors.linkUrl?.message, "x")} {...form.register("linkUrl")} />
+        <Input id="poster-link" className="h-9" inputMode="url" aria-invalid={!!errors.linkUrl} aria-describedby={describedBy("poster-link", errors.linkUrl?.message, "x")} {...form.register("linkUrl")} />
       </Field>
       <Field id="poster-sort" label="Sort order" error={errors.sortOrder?.message} hint="Lower numbers come first.">
         <Input id="poster-sort" type="number" min={0} className="h-11 w-32" aria-describedby={describedBy("poster-sort", errors.sortOrder?.message, "x")} {...form.register("sortOrder", { valueAsNumber: true })} />
@@ -95,10 +110,10 @@ function PosterForm({ poster, nextSortOrder, onDone }: { poster?: PosterDialogPr
         )}
       />
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" className="h-11 sm:h-9" onClick={onDone} disabled={pending}>
+        <Button type="button" variant="outline" className="h-9 sm:h-8" onClick={onDone} disabled={pending}>
           Cancel
         </Button>
-        <Button type="submit" className="h-11 sm:h-9" disabled={pending}>
+        <Button type="submit" className="h-9 sm:h-8" disabled={pending}>
           {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
           {pending ? "Saving…" : "Save"}
         </Button>

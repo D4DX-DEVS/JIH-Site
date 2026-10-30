@@ -1,0 +1,24 @@
+ALTER TABLE `categories` ADD `name_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `categories` ADD `description_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `downloads` ADD `title_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `downloads` ADD `description_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `galleries` ADD `title_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `galleries` ADD `description_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `gallery_categories` ADD `name_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `leaders` ADD `name_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `leaders` ADD `role_title_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `leaders` ADD `bio_html_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `nav_items` ADD `label_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `pages` ADD `title_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `pages` ADD `summary_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `pages` ADD `content_html_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `pages` ADD `seo_title_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `pages` ADD `seo_description_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `posters` ADD `title_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `posts` ADD `title_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `posts` ADD `excerpt_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `posts` ADD `content_html_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `posts` ADD `seo_title_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `posts` ADD `seo_description_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `videos` ADD `title_en` text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE `videos` ADD `description_en` text DEFAULT '' NOT NULL;

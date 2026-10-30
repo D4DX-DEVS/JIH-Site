@@ -16,7 +16,7 @@ export async function saveCategoryAction(id: number | null, values: CategoryForm
   if (!parsed.success) return invalidResult(parsed.error);
   const data = parsed.data;
   const db = await getDb();
-  const slug = slugOrTitle(data.slug, data.name);
+  const slug = slugOrTitle(data.slug, data.name || data.nameEn);
   if (!slug) return fieldError("slug", "Slug is required");
 
   const [clash] = await db
@@ -36,7 +36,7 @@ export async function saveCategoryAction(id: number | null, values: CategoryForm
     }
   }
 
-  const row = { name: data.name, slug, description: data.description, parentId: data.parentId, updatedAt: new Date().toISOString() };
+  const row = { name: data.name, nameEn: data.nameEn, slug, description: data.description, descriptionEn: data.descriptionEn, parentId: data.parentId, updatedAt: new Date().toISOString() };
   let categoryId = id;
   if (id) {
     const [updated] = await db.update(categories).set(row).where(eq(categories.id, id)).returning({ id: categories.id });
@@ -45,7 +45,8 @@ export async function saveCategoryAction(id: number | null, values: CategoryForm
     const [created] = await db.insert(categories).values(row).returning({ id: categories.id });
     categoryId = created.id;
   }
-  await logActivity(session.actor, id ? "update" : "create", "category", categoryId!, `${id ? "Updated" : "Created"} category “${data.name}”`);
+  const name = data.name || data.nameEn;
+  await logActivity(session.actor, id ? "update" : "create", "category", categoryId!, `${id ? "Updated" : "Created"} category “${name}”`);
   refreshPublic("categories", "posts");
   return { ok: true, id: categoryId!, message: id ? "Category saved" : "Category created" };
 }
@@ -54,9 +55,10 @@ export async function deleteCategoryAction(id: number): Promise<ActionResult> {
   const session = await requireAdmin();
   const db = await getDb();
   // post_categories rows cascade; subcategories move to the top level (FK is ON DELETE SET NULL).
-  const [row] = await db.delete(categories).where(eq(categories.id, id)).returning({ name: categories.name });
+  const [row] = await db.delete(categories).where(eq(categories.id, id)).returning({ name: categories.name, nameEn: categories.nameEn });
   if (!row) return { ok: false, error: "Category not found" };
-  await logActivity(session.actor, "delete", "category", id, `Deleted category “${row.name}”`);
+  const name = row.name || row.nameEn;
+  await logActivity(session.actor, "delete", "category", id, `Deleted category “${name}”`);
   refreshPublic("categories", "posts");
   return { ok: true, message: "Category deleted" };
 }

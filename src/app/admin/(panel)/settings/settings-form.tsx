@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { Panel } from "@/components/admin/admin-ui";
 import { applyFormResult } from "@/components/admin/form-dialog";
 import { Field, describedBy } from "@/components/admin/form-bits";
+import { LanguageTab, LanguageTabs } from "@/components/admin/language-tabs";
 import { MediaField } from "@/components/admin/media-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,8 @@ export interface SettingsField {
   kind: "text" | "textarea" | "email" | "url" | "tel" | "image";
   hint?: string;
   dir?: "auto";
+  /** Has an English twin stored as `${name}En`; the pair is edited under the Malayalam / English tabs. */
+  bilingual?: boolean;
 }
 
 interface SettingsFormProps {
@@ -50,64 +53,80 @@ export function SettingsForm({ group, title, description, fields, initial, image
     }),
   );
 
+  const bilingual = fields.filter((f) => f.bilingual);
+  const shared = fields.filter((f) => !f.bilingual);
+
+  const renderField = (f: SettingsField, name: string) => {
+    const id = `${group}-${name}`;
+    const error = message(name);
+    if (f.kind === "image") {
+      return (
+        <div key={name} className="space-y-2 md:col-span-2">
+          <span className="text-sm font-medium">{f.label}</span>
+          {f.hint ? <p className="text-xs text-muted-foreground">{f.hint}</p> : null}
+          <Controller
+            control={form.control}
+            name={name as Path<FieldValues>}
+            render={({ field }) => (
+              <MediaField
+                label="Image"
+                value={(field.value as number | null) ?? null}
+                preview={previews[name] ?? null}
+                onChange={(m) => {
+                  setPreviews((p) => ({ ...p, [name]: m }));
+                  field.onChange(m?.id ?? null);
+                }}
+              />
+            )}
+          />
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        </div>
+      );
+    }
+    const common = {
+      id,
+      "aria-invalid": !!error,
+      "aria-describedby": describedBy(id, error, f.hint),
+      ...form.register(name),
+    };
+    return (
+      <div key={name} className={f.kind === "textarea" ? "md:col-span-2" : undefined}>
+        <Field id={id} label={f.label} error={error} hint={f.hint}>
+          {f.kind === "textarea" ? (
+            <Textarea rows={3} dir={f.dir} {...common} />
+          ) : (
+            <Input type={f.kind} className="h-9" dir={f.dir} inputMode={f.kind === "url" ? "url" : undefined} {...common} />
+          )}
+        </Field>
+      </div>
+    );
+  };
+
   return (
     <form onSubmit={onSubmit} noValidate>
       <Panel
         title={title}
         description={description}
         actions={
-          <Button type="submit" className="h-11 sm:h-9" disabled={pending || !isDirty}>
+          <Button type="submit" className="h-9 sm:h-8" disabled={pending || !isDirty}>
             {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
             {pending ? "Saving…" : "Save"}
           </Button>
         }
       >
-        <div className="grid gap-4 md:grid-cols-2">
-          {fields.map((f) => {
-            const id = `${group}-${f.name}`;
-            const error = message(f.name);
-            if (f.kind === "image") {
-              return (
-                <div key={f.name} className="space-y-2 md:col-span-2">
-                  <span className="text-sm font-medium">{f.label}</span>
-                  {f.hint ? <p className="text-xs text-muted-foreground">{f.hint}</p> : null}
-                  <Controller
-                    control={form.control}
-                    name={f.name as Path<FieldValues>}
-                    render={({ field }) => (
-                      <MediaField
-                        label="Image"
-                        value={(field.value as number | null) ?? null}
-                        preview={previews[f.name] ?? null}
-                        onChange={(m) => {
-                          setPreviews((p) => ({ ...p, [f.name]: m }));
-                          field.onChange(m?.id ?? null);
-                        }}
-                      />
-                    )}
-                  />
-                  {error ? <p className="text-sm text-destructive">{error}</p> : null}
-                </div>
-              );
-            }
-            const common = {
-              id,
-              "aria-invalid": !!error,
-              "aria-describedby": describedBy(id, error, f.hint),
-              ...form.register(f.name),
-            };
-            return (
-              <div key={f.name} className={f.kind === "textarea" ? "md:col-span-2" : undefined}>
-                <Field id={id} label={f.label} error={error} hint={f.hint}>
-                  {f.kind === "textarea" ? (
-                    <Textarea rows={3} dir={f.dir} {...common} />
-                  ) : (
-                    <Input type={f.kind} className="h-11" dir={f.dir} inputMode={f.kind === "url" ? "url" : undefined} {...common} />
-                  )}
-                </Field>
-              </div>
-            );
-          })}
+        <div className="space-y-6">
+          {bilingual.length ? (
+            <LanguageTabs>
+              {(["ml", "en"] as const).map((lang) => (
+                <LanguageTab key={lang} value={lang}>
+                  <div className="grid gap-4 md:grid-cols-2" lang={lang === "en" ? "en" : undefined}>
+                    {bilingual.map((f) => renderField(f, lang === "en" ? `${f.name}En` : f.name))}
+                  </div>
+                </LanguageTab>
+              ))}
+            </LanguageTabs>
+          ) : null}
+          {shared.length ? <div className="grid gap-4 md:grid-cols-2">{shared.map((f) => renderField(f, f.name))}</div> : null}
         </div>
       </Panel>
     </form>

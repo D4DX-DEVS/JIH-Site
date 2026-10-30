@@ -60,4 +60,17 @@ describe("search patterns", () => {
   it("escapes LIKE wildcards so user input matches literally", () => {
     expect(likePattern("50%_off\\")).toBe("%50\\%\\_off\\\\%");
   });
+
+  // D1 rejects LIKE patterns over 50 bytes ("LIKE or GLOB pattern too complex"); Malayalam is 3 bytes a letter.
+  it("keeps long Malayalam queries within D1's 50-byte pattern limit", () => {
+    const pattern = likePattern("മലര്‍വാടി ബാലസംഘം");
+    expect(new TextEncoder().encode(pattern).length).toBeLessThanOrEqual(50);
+    expect(pattern).toBe("%മലര്‍വാടി ബാലസംഘ%");
+  });
+
+  it("never cuts an escape sequence in half", () => {
+    const pattern = likePattern(`${"a".repeat(47)}%`);
+    expect(pattern).toBe(`%${"a".repeat(47)}%`);
+    expect(likePattern("a".repeat(30))).toBe(`%${"a".repeat(30)}%`);
+  });
 });

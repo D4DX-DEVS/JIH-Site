@@ -61,11 +61,11 @@ export function ListToolbar({ searchPlaceholder = "Search", filters = [], sorts 
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <div className="relative sm:w-72">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={searchPlaceholder} aria-label={searchPlaceholder} className="h-11 pl-9 sm:h-9" maxLength={100} />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={searchPlaceholder} aria-label={searchPlaceholder} className="h-10 pl-9 sm:h-9" maxLength={100} />
       </div>
       {filters.map((f) => (
         <Select key={f.name} value={params.get(f.name) ?? ALL} onValueChange={(v) => update({ [f.name]: v === ALL ? null : v })}>
-          <SelectTrigger className="h-11 w-full sm:h-9 sm:w-44" aria-label={f.label} data-active={!!params.get(f.name)}>
+          <SelectTrigger className="h-10 w-full sm:h-9 sm:w-44" aria-label={f.label} data-active={!!params.get(f.name)}>
             <SelectValue placeholder={f.label} />
           </SelectTrigger>
           <SelectContent>
@@ -81,7 +81,7 @@ export function ListToolbar({ searchPlaceholder = "Search", filters = [], sorts 
       {sorts.length ? (
         <div className="flex gap-2">
           <Select value={params.get("sort") ?? defaultSort ?? sorts[0].value} onValueChange={(v) => update({ sort: v })}>
-            <SelectTrigger className="h-11 w-full sm:h-9 sm:w-40" aria-label="Sort by">
+            <SelectTrigger className="h-10 w-full sm:h-9 sm:w-40" aria-label="Sort by">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -96,7 +96,7 @@ export function ListToolbar({ searchPlaceholder = "Search", filters = [], sorts 
             type="button"
             variant="outline"
             size="icon"
-            className="size-11 sm:size-9"
+            className="size-10 sm:size-9"
             onClick={() => update({ order: order === "asc" ? "desc" : "asc" })}
             aria-label={order === "asc" ? "Ascending; switch to descending" : "Descending; switch to ascending"}
           >
@@ -108,7 +108,7 @@ export function ListToolbar({ searchPlaceholder = "Search", filters = [], sorts 
         <Button
           type="button"
           variant="ghost"
-          className="h-11 sm:h-9"
+          className="h-10 sm:h-9"
           onClick={() => {
             setQ("");
             startTransition(() => router.replace(pathname, { scroll: false }));

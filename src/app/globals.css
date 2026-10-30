@@ -316,40 +316,46 @@
   to { transform: scale(1); }
 }
 
-/* Admin panel theme: logo navy on a cool grey canvas. Scoped so the public site keeps its own palette. */
+/* Admin panel theme. Tinted frame, white sheet: sidebar and top bar share one cool ground with no
+   rule between them; the page sits on a white sheet. Colour goes on data and the one primary action,
+   not on the chrome. Scoped so the public site keeps its own palette. */
 .admin-theme {
-  --admin-canvas: #eef1f7;
   --admin-navy: #071e7f;
   --admin-navy-deep: #050f45;
   --admin-rail: #0c1a5e;
-  --admin-sky: #e7ebfa;
-  --admin-haze: #c9cfee;
+  --admin-frame: #f4f5f9;
+  --admin-sheet: #ffffff;
+  --admin-edge: #e4e7ef;
+  --admin-rule: #eef0f5;
+  --admin-pill: #e9ecf5;
+  --admin-sky: #e8ecfb;
+  --admin-sky-deep: #d6dcf6;
 
-  --background: var(--admin-canvas);
+  --background: var(--admin-frame);
   --foreground: #0b1233;
-  --card: #ffffff;
+  --card: var(--admin-sheet);
   --card-foreground: #0b1233;
   --popover: #ffffff;
   --popover-foreground: #0b1233;
   --primary: var(--admin-navy);
   --primary-foreground: #ffffff;
-  --secondary: #f2f4f9;
+  --secondary: #eef0f5;
   --secondary-foreground: #0b1233;
-  --muted: #f2f4f9;
-  --muted-foreground: #5d6482;
-  --accent: var(--admin-sky);
-  --accent-foreground: var(--admin-navy);
-  --border: #e4e7f0;
-  --input: #d6dbe8;
+  --muted: #f3f4f8;
+  --muted-foreground: #626a86;
+  --accent: #eef0f5;
+  --accent-foreground: #0b1233;
+  --border: var(--admin-edge);
+  --input: #d5d9e4;
   --ring: var(--admin-navy);
-  --radius: 1rem;
-  --sidebar: var(--admin-rail);
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #ffffff;
+  --radius: 0.625rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0b1233;
+  --sidebar-primary: var(--admin-sky);
   --sidebar-primary-foreground: var(--admin-navy);
-  --sidebar-accent: rgb(255 255 255 / 0.08);
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgb(255 255 255 / 0.12);
+  --sidebar-accent: var(--admin-frame);
+  --sidebar-accent-foreground: #0b1233;
+  --sidebar-border: var(--admin-edge);
   --sidebar-ring: var(--admin-navy);
   --chart-1: var(--admin-navy);
   --chart-2: #8a97d6;
@@ -357,9 +363,16 @@
   --chart-4: #c99a3c;
   --chart-5: #b42318;
 
-  font-size: 0.9375rem;
-  background: var(--admin-canvas);
+  font-size: 0.875rem;
+  background: var(--admin-frame);
   color: var(--foreground);
+}
+/* A block on the canvas: white, one edge, a whisper of shadow so it lifts off the grey ground. */
+.admin-card {
+  background: var(--admin-sheet);
+  border: 1px solid var(--admin-edge);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgb(11 18 51 / 0.04), 0 1px 1px rgb(11 18 51 / 0.02);
 }
 .admin-theme ::selection {
   background: var(--admin-navy);

@@ -30,17 +30,20 @@ export default async function EditPagePage({ params }: PageProps<"/admin/pages/[
         <Link href="/admin/pages/" className="inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="size-4" aria-hidden="true" /> Pages
         </Link>
-        <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{page ? "Edit page" : "New page"}</h1>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">{page ? "Edit page" : "New page"}</h1>
       </div>
       <PageForm
         id={id}
         featured={featured}
         initial={{
           title: page?.title ?? "",
+          titleEn: page?.titleEn ?? "",
           slug: page?.slug ?? "",
           status: page?.status ?? "draft",
           summary: page?.summary ?? "",
+          summaryEn: page?.summaryEn ?? "",
           contentHtml: page?.contentHtml ?? "",
+          contentHtmlEn: page?.contentHtmlEn ?? "",
           featuredMediaId: page?.featuredMediaId ?? null,
           template: page?.template ?? "default",
           section: page?.section ?? "general",
@@ -49,6 +52,8 @@ export default async function EditPagePage({ params }: PageProps<"/admin/pages/[
           sortOrder: page?.sortOrder ?? 0,
           seoTitle: page?.seoTitle ?? "",
           seoDescription: page?.seoDescription ?? "",
+          seoTitleEn: page?.seoTitleEn ?? "",
+          seoDescriptionEn: page?.seoDescriptionEn ?? "",
         }}
       />
     </>

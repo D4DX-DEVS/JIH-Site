@@ -61,7 +61,7 @@ async function LedgerTable({ params, type }: { params: AdminListParams<Sort>; ty
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div className="admin-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

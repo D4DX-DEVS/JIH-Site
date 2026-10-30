@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { and, asc, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 import { AdminEmptyState, PageHeader, StatusBadge, TableSkeleton } from "@/components/admin/admin-ui";
+import { LanguageBadge } from "@/components/admin/language-badge";
 import { DataPagination } from "@/components/admin/data-pagination";
 import { ListToolbar } from "@/components/admin/list-toolbar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -25,13 +26,17 @@ async function PostsTable({ params, category }: { params: AdminListParams<Sort>;
   const db = await getDb();
   const where: SQL[] = [];
   if (params.status) where.push(eq(posts.status, params.status as "draft" | "published"));
-  if (params.q) where.push(sql`${posts.searchText} like ${likePattern(params.q)} escape '\\'`);
+  if (params.q) {
+    where.push(
+      sql`(${posts.searchText} like ${likePattern(params.q)} escape '\\') or (${posts.title} like ${likePattern(params.q)} escape '\\') or (${posts.titleEn} like ${likePattern(params.q)} escape '\\')`
+    );
+  }
   if (category) where.push(inArray(posts.id, db.select({ id: postCategories.postId }).from(postCategories).where(eq(postCategories.categoryId, category))));
   const condition = where.length ? and(...where) : undefined;
   const orderBy = params.order === "asc" ? asc(SORT_COLUMNS[params.sort]) : desc(SORT_COLUMNS[params.sort]);
   const [rows, [{ total }]] = await Promise.all([
     db
-      .select({ id: posts.id, title: posts.title, slug: posts.slug, status: posts.status, publishedAt: posts.publishedAt, updatedAt: posts.updatedAt })
+      .select({ id: posts.id, title: posts.title, titleEn: posts.titleEn, slug: posts.slug, status: posts.status, publishedAt: posts.publishedAt, updatedAt: posts.updatedAt })
       .from(posts)
       .where(condition)
       .orderBy(orderBy, desc(posts.id))
@@ -51,7 +56,7 @@ async function PostsTable({ params, category }: { params: AdminListParams<Sort>;
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div className="admin-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -65,12 +70,17 @@ async function PostsTable({ params, category }: { params: AdminListParams<Sort>;
             {rows.map((p) => (
               <TableRow key={p.id}>
                 <TableCell className="max-w-0 whitespace-normal">
-                  <Link href={`/admin/posts/${p.id}/`} className="line-clamp-2 font-medium hover:underline">
-                    {p.title}
-                  </Link>
-                  <a href={routes.post(p.slug)} target="_blank" rel="noopener" className="text-xs text-muted-foreground hover:underline">
-                    View on site
-                  </a>
+                  <div className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <Link href={`/admin/posts/${p.id}/`} className="line-clamp-2 font-medium hover:underline">
+                        {p.title || p.titleEn}
+                      </Link>
+                      <a href={routes.post(p.slug)} target="_blank" rel="noopener" className="text-xs text-muted-foreground hover:underline">
+                        View on site
+                      </a>
+                    </div>
+                    <LanguageBadge ml={!!p.title} en={!!p.titleEn} />
+                  </div>
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={p.status} />

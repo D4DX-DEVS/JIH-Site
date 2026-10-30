@@ -41,7 +41,7 @@ export function StatusControls({ id, status }: { id: number; status: Status }) {
       {options
         .filter((o) => o.value !== status)
         .map((o) => (
-          <Button key={o.value} type="button" variant="outline" className="h-11 sm:h-9" disabled={pending} onClick={() => change(o.value)}>
+          <Button key={o.value} type="button" variant="outline" className="h-9 sm:h-8" disabled={pending} onClick={() => change(o.value)}>
             {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <o.icon className="size-4" aria-hidden="true" />}
             {o.label}
           </Button>

@@ -2,25 +2,28 @@
 
 Every public WordPress address either keeps working at the same path or permanently redirects to its replacement. Trailing slashes are kept, as on WordPress.
 
+The site is bilingual. Malayalam, the default, keeps every address below unchanged; `next.config.ts` rewrites them internally to `/ml/…` so they render through `src/app/[lang]`. The English version of any page is the same path under `/en/` (`/history/` → `/en/history/`). Both versions carry `hreflang` alternates and both are in the sitemap. A record with no text in the reader's language is shown in the other one with a notice.
+
 | WordPress address | New address | How | Status |
 |---|---|---|---|
 | `/` (Elementor front page) | `/` | Rebuilt homepage | 200 |
-| `/<post-slug>/` | same | `(site)/[slug]`, post found by slug (Malayalam slugs decode to the same text) | 200 |
-| `/<page-slug>/` | same | `(site)/[slug]`, page found by slug, rendered with its template | 200 |
+| `/<post-slug>/` | same | `[lang]/[slug]`, post found by slug (Malayalam slugs decode to the same text) | 200 |
+| `/<page-slug>/` | same | `[lang]/[slug]`, page found by slug, rendered with its template | 200 |
 | `/blog/` (posts page) | `/news/` | `next.config.ts` redirect | 308 |
 | `/news/page/<n>/` | `/news/?page=<n>` | `next.config.ts` redirect | 308 |
-| `/category/<path>/` | same | `(site)/category/[...path]` | 200 |
+| `/category/<path>/` | same | `[lang]/category/[...path]` | 200 |
 | `/category/<path>/page/<n>/` | `/category/<path>/?page=<n>` | `next.config.ts` redirect | 308 |
-| `/tag/<slug>/` | same | `(site)/tag/[slug]` | 200 |
+| `/tag/<slug>/` | same | `[lang]/tag/[slug]` | 200 |
 | `/author/<name>/` | `/news/` | `next.config.ts` redirect (single author) | 308 |
 | `/leadership/` | `/leaders/` | `next.config.ts` redirect | 308 |
-| `/leadership/<slug>/` | same | `(site)/leadership/[slug]` | 200 |
-| `/image-gallery/`, `/image-gallery/<slug>/` | same | `(site)/image-gallery` | 200 |
-| `/image-category/<slug>/` | same | `(site)/image-category/[slug]` | 200 |
-| `/video-gallery/`, `/video-gallery/<slug>/` | same | `(site)/video-gallery` | 200 |
+| `/leadership/<slug>/` | same | `[lang]/leadership/[slug]` | 200 |
+| `/image-gallery/`, `/image-gallery/<slug>/` | same | `[lang]/image-gallery` | 200 |
+| `/image-category/<slug>/` | same | `[lang]/image-category/[slug]` | 200 |
+| `/video-gallery/`, `/video-gallery/<slug>/` | same | `[lang]/video-gallery` | 200 |
 | `/wp-content/uploads/<path>` | `/media/uploads/<path>` | `next.config.ts` redirect; the file is served from R2 | 308 |
 | Attachment pages: `/<attachment>/`, `/<parent>/<attachment>/`, `/image-gallery/<gallery>/<attachment>/` … | the file under `/media/uploads/…` | 850 rows in D1 `redirects` (source `migration`), answered by the Worker before rendering | 308 |
-| `/ml/` and `/ml/<path>/` (TranslatePress) | `/` and `/<path>/` | `next.config.ts` redirect to the canonical page | 308 |
+| `/ml/` and `/ml/<path>/` (TranslatePress) | `/` and `/<path>/` | `next.config.ts` redirect to the Malayalam page | 308 |
+| — | `/en/` and `/en/<path>/` | English version of every public page (new) | 200 |
 | `/feed/` | `/feed/` | RSS 2.0 of the latest posts | 200 |
 | `/wp-admin/…`, `/wp-login.php` | `/admin/`, `/admin/login/` | `next.config.ts` redirect (temporary) | 307 |
 | Anything else | not-found page | `noindex`; 404 status (see note) | 404 |

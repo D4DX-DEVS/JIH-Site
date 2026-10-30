@@ -20,9 +20,9 @@ export function FormDialog({ trigger, title, description, children }: FormDialog
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+      <DialogContent className="max-h-[90dvh] gap-5 overflow-y-auto p-5 sm:max-w-md">
+        <DialogHeader className="gap-1">
+          <DialogTitle className="text-base font-semibold">{title}</DialogTitle>
           {description ? <DialogDescription>{description}</DialogDescription> : null}
         </DialogHeader>
         {open ? children(() => setOpen(false)) : null}

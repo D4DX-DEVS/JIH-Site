@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { RAIL_IDLE, RAIL_ITEM } from "./rail-styles";
+import { RAIL_ACTIVE, RAIL_ICON, RAIL_ICON_ACTIVE, RAIL_IDLE, RAIL_ITEM } from "./rail-styles";
 
 export const ADMIN_NAV = [
   { group: "Overview", items: [{ href: "/admin/", label: "Dashboard", icon: LayoutDashboard }] },
@@ -40,26 +40,22 @@ export const ADMIN_NAV = [
   },
 ] as const;
 
-
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Admin" className="space-y-4">
+    <nav aria-label="Admin" className="space-y-5">
       {ADMIN_NAV.map((section) => (
         <div key={section.group}>
-          <p className="px-3 text-xs font-medium text-white/45">{section.group}</p>
-          <ul className="mt-1 space-y-px">
+          <p className="mb-1.5 px-2 text-xs font-medium text-muted-foreground">{section.group}</p>
+          <ul className="space-y-0.5">
             {section.items.map(({ href, label, icon: Icon }) => {
               const active = href === "/admin/" ? pathname === "/admin" || pathname === "/admin/" : pathname.startsWith(href.replace(/\/$/, ""));
               return (
                 <li key={href}>
-                  <Link
-                    href={href}
-                    onClick={onNavigate}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(RAIL_ITEM, active ? "bg-sidebar-primary text-sidebar-primary-foreground" : RAIL_IDLE)}
-                  >
-                    <Icon className="size-[18px]" aria-hidden="true" />
+                  <Link href={href} onClick={onNavigate} aria-current={active ? "page" : undefined} className={cn(RAIL_ITEM, active ? RAIL_ACTIVE : RAIL_IDLE)}>
+                    <span className={cn(RAIL_ICON, active && RAIL_ICON_ACTIVE)}>
+                      <Icon className="size-4" strokeWidth={1.75} aria-hidden="true" />
+                    </span>
                     {label}
                   </Link>
                 </li>
@@ -72,34 +68,34 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function RailFooter({ footer }: { footer?: ReactNode }) {
+function RailFooter() {
   return (
-    <div className="mt-4 space-y-px border-t border-sidebar-border pt-3">
-      <a href="/" target="_blank" rel="noopener" className={cn(RAIL_ITEM, RAIL_IDLE)}>
-        <ExternalLink className="size-[18px]" aria-hidden="true" /> View website
-      </a>
-      {footer}
-    </div>
+    <a href="/" target="_blank" rel="noopener" className={cn(RAIL_ITEM, RAIL_IDLE, "mt-5")}>
+      <span className={RAIL_ICON}>
+        <ExternalLink className="size-4" strokeWidth={1.75} aria-hidden="true" />
+      </span>
+      View website
+    </a>
   );
 }
 
+/** The product's mark at the top of the rail. */
 function RailLogo() {
   return (
-    <Link href="/admin/" className="mb-5 flex items-center px-2 pt-1">
-      <Image src="/brand/logo-white.png" alt="JIH Kerala admin" width={768} height={225} className="h-9 w-auto" loading="eager" />
+    <Link href="/admin/" className="mb-6 flex h-10 items-center px-2">
+      <Image src="/brand/logo-blue.png" alt="JIH Kerala admin" width={768} height={225} className="h-8 w-auto" loading="eager" />
     </Link>
   );
 }
 
-/** `footer` carries the sign-out form, which needs the server action from the layout. */
-export function AdminSidebar({ footer }: { footer?: ReactNode }) {
+export function AdminSidebar() {
   return (
-    <aside className="hidden w-60 shrink-0 lg:block">
-      <div className="no-scrollbar sticky top-4 flex max-h-[calc(100svh-2rem)] min-h-[calc(100svh-2rem)] flex-col overflow-y-auto rounded-2xl bg-sidebar p-4 text-sidebar-foreground">
+    <aside className="hidden w-[248px] shrink-0 border-r border-border bg-sidebar lg:block">
+      <div className="no-scrollbar sticky top-0 flex h-svh flex-col overflow-y-auto px-3 pt-4 pb-4">
         <RailLogo />
         <NavLinks />
         <div className="mt-auto">
-          <RailFooter footer={footer} />
+          <RailFooter />
         </div>
       </div>
     </aside>
@@ -110,17 +106,18 @@ export function AdminMobileNav({ footer }: { footer?: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="inline-flex size-11 items-center justify-center rounded-xl hover:bg-muted lg:hidden" aria-label="Open admin menu">
+      <SheetTrigger className="inline-flex size-10 items-center justify-center rounded-lg hover:bg-muted lg:hidden" aria-label="Open admin menu">
         <Menu className="size-5" aria-hidden="true" />
       </SheetTrigger>
-      <SheetContent side="left" className="admin-theme no-scrollbar w-72 overflow-y-auto border-0 bg-sidebar p-4 text-sidebar-foreground [&_[data-slot=sheet-close]]:text-white">
+      <SheetContent side="left" className="admin-theme no-scrollbar w-72 overflow-y-auto border-0 bg-sidebar px-3 pt-4 pb-4 text-sidebar-foreground">
         <SheetHeader className="p-0">
           <SheetTitle className="sr-only">Admin menu</SheetTitle>
           <SheetDescription className="sr-only">Admin navigation</SheetDescription>
           <RailLogo />
         </SheetHeader>
         <NavLinks onNavigate={() => setOpen(false)} />
-        <RailFooter footer={footer} />
+        <RailFooter />
+        {footer}
       </SheetContent>
     </Sheet>
   );

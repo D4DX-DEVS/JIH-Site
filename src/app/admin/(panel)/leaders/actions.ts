@@ -20,7 +20,7 @@ export async function saveLeaderAction(id: number | null, values: LeaderFormValu
   }
   const data = parsed.data;
   const db = await getDb();
-  const slug = slugOrTitle(data.slug, data.name);
+  const slug = slugOrTitle(data.slug, data.name || data.nameEn);
   if (!slug) return { ok: false, error: "Slug is required", fieldErrors: { slug: "Slug is required" } };
   const [taken] = await db
     .select({ id: leaders.id })
@@ -31,10 +31,13 @@ export async function saveLeaderAction(id: number | null, values: LeaderFormValu
 
   const row = {
     name: data.name,
+    nameEn: data.nameEn,
     slug,
     roleTitle: data.roleTitle,
+    roleTitleEn: data.roleTitleEn,
     groupKey: data.groupKey,
     bioHtml: sanitizeRichText(data.bioHtml),
+    bioHtmlEn: sanitizeRichText(data.bioHtmlEn),
     photoMediaId: data.photoMediaId,
     sortOrder: data.sortOrder,
     status: data.status,
@@ -50,7 +53,8 @@ export async function saveLeaderAction(id: number | null, values: LeaderFormValu
     leaderId = created.id;
   }
 
-  await logActivity(session.actor, id ? "update" : "create", "leader", leaderId!, `${id ? "Updated" : "Added"} leader “${data.name}”`);
+  const name = data.name || data.nameEn;
+  await logActivity(session.actor, id ? "update" : "create", "leader", leaderId!, `${id ? "Updated" : "Added"} leader “${name}”`);
   refreshPublic("leaders");
   return { ok: true, id: leaderId!, slug };
 }
@@ -58,9 +62,10 @@ export async function saveLeaderAction(id: number | null, values: LeaderFormValu
 export async function deleteLeaderAction(id: number): Promise<ActionResult> {
   const session = await requireAdmin();
   const db = await getDb();
-  const [row] = await db.delete(leaders).where(eq(leaders.id, id)).returning({ name: leaders.name });
+  const [row] = await db.delete(leaders).where(eq(leaders.id, id)).returning({ name: leaders.name, nameEn: leaders.nameEn });
   if (!row) return { ok: false, error: "Leader not found" };
-  await logActivity(session.actor, "delete", "leader", id, `Removed leader “${row.name}”`);
+  const name = row.name || row.nameEn;
+  await logActivity(session.actor, "delete", "leader", id, `Removed leader “${name}”`);
   refreshPublic("leaders");
   return { ok: true, message: "Leader removed" };
 }

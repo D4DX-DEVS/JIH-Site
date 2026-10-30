@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { FormDialog, applyFormResult } from "@/components/admin/form-dialog";
 import { Field, describedBy } from "@/components/admin/form-bits";
+import { LanguageTabs, LanguageTab } from "@/components/admin/language-tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,7 +19,7 @@ const TOP = "top";
 interface NavItemDialogProps {
   trigger: ReactNode;
   menu: "header" | "footer";
-  item?: { id: number; label: string; url: string; parentId: number | null; hasChildren: boolean };
+  item?: { id: number; label: string; labelEn: string; url: string; parentId: number | null; hasChildren: boolean };
   /** Top-level items of this menu, offered as parents. */
   parents: Array<{ id: number; label: string }>;
   defaultParentId?: number | null;
@@ -37,7 +38,7 @@ function NavItemForm({ menu, item, parents, defaultParentId, onDone }: Omit<NavI
   const [pending, startTransition] = useTransition();
   const form = useForm<NavItemFormValues>({
     resolver: zodResolver(navItemSchema),
-    defaultValues: { menu, label: item?.label ?? "", url: item?.url ?? "", parentId: item ? item.parentId : defaultParentId, sortOrder: 0 },
+    defaultValues: { menu, label: item?.label ?? "", labelEn: item?.labelEn ?? "", url: item?.url ?? "", parentId: item ? item.parentId : defaultParentId, sortOrder: 0 },
   });
   const { errors } = form.formState;
 
@@ -52,11 +53,20 @@ function NavItemForm({ menu, item, parents, defaultParentId, onDone }: Omit<NavI
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
-      <Field id="nav-label" label="Label" error={errors.label?.message}>
-        <Input id="nav-label" className="h-11" aria-invalid={!!errors.label} aria-describedby={describedBy("nav-label", errors.label?.message)} {...form.register("label")} />
-      </Field>
+      <LanguageTabs>
+        <LanguageTab value="ml">
+          <Field id="nav-label" label="Label" error={errors.label?.message}>
+            <Input id="nav-label" className="h-9" aria-invalid={!!errors.label} aria-describedby={describedBy("nav-label", errors.label?.message)} {...form.register("label")} />
+          </Field>
+        </LanguageTab>
+        <LanguageTab value="en">
+          <Field id="nav-labelEn" label="Label" error={errors.labelEn?.message}>
+            <Input id="nav-labelEn" className="h-9" aria-invalid={!!errors.labelEn} aria-describedby={describedBy("nav-labelEn", errors.labelEn?.message)} {...form.register("labelEn")} />
+          </Field>
+        </LanguageTab>
+      </LanguageTabs>
       <Field id="nav-url" label="Link" error={errors.url?.message} hint="A path like /about-us/ or a full https:// address. A top-level item with sub-items may leave this empty.">
-        <Input id="nav-url" className="h-11" inputMode="url" aria-invalid={!!errors.url} aria-describedby={describedBy("nav-url", errors.url?.message, "x")} {...form.register("url")} />
+        <Input id="nav-url" className="h-9" inputMode="url" aria-invalid={!!errors.url} aria-describedby={describedBy("nav-url", errors.url?.message, "x")} {...form.register("url")} />
       </Field>
       {item?.hasChildren ? (
         <p className="text-sm text-muted-foreground">This item has sub-items, so it stays at the top level.</p>
@@ -67,7 +77,7 @@ function NavItemForm({ menu, item, parents, defaultParentId, onDone }: Omit<NavI
             name="parentId"
             render={({ field }) => (
               <Select value={field.value ? String(field.value) : TOP} onValueChange={(v) => field.onChange(v === TOP ? null : Number(v))}>
-                <SelectTrigger id="nav-parent" className="h-11 w-full" aria-invalid={!!errors.parentId}>
+                <SelectTrigger id="nav-parent" className="h-9 w-full" aria-invalid={!!errors.parentId}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -84,10 +94,10 @@ function NavItemForm({ menu, item, parents, defaultParentId, onDone }: Omit<NavI
         </Field>
       )}
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" className="h-11 sm:h-9" onClick={onDone} disabled={pending}>
+        <Button type="button" variant="outline" className="h-9 sm:h-8" onClick={onDone} disabled={pending}>
           Cancel
         </Button>
-        <Button type="submit" className="h-11 sm:h-9" disabled={pending}>
+        <Button type="submit" className="h-9 sm:h-8" disabled={pending}>
           {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
           {pending ? "Saving…" : "Save"}
         </Button>

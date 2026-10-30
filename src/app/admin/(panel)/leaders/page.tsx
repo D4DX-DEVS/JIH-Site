@@ -4,12 +4,13 @@ import { Suspense } from "react";
 import { and, asc, desc, eq, sql, type SQL } from "drizzle-orm";
 import { UserRound } from "lucide-react";
 import { AdminEmptyState, PageHeader, StatusBadge, TableSkeleton } from "@/components/admin/admin-ui";
+import { LanguageBadge } from "@/components/admin/language-badge";
 import { DataPagination } from "@/components/admin/data-pagination";
 import { ListToolbar } from "@/components/admin/list-toolbar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getDb } from "@/db/client";
 import { LEADER_GROUPS, leaders, media, type LeaderGroup } from "@/db/schema";
-import { LEADER_GROUP_TITLES } from "@/app/(site)/_components/templates/leaders-page";
+import { LEADER_GROUP_TITLES } from "@/app/[lang]/_components/templates/leaders-page";
 import { parseAdminList, type AdminListParams } from "@/lib/admin/list-params";
 import { requireAdmin } from "@/lib/auth/session";
 import { pickVariant } from "@/lib/media-url";
@@ -30,14 +31,24 @@ async function LeadersTable({ params, group }: { params: AdminListParams<Sort>; 
   if (group) where.push(eq(leaders.groupKey, group));
   if (params.q) {
     const pattern = likePattern(params.q);
-    where.push(sql`(lower(${leaders.name}) like ${pattern} escape '\\' or lower(${leaders.roleTitle}) like ${pattern} escape '\\')`);
+    where.push(
+      sql`(lower(${leaders.name}) like ${pattern} escape '\\' or lower(${leaders.nameEn}) like ${pattern} escape '\\' or lower(${leaders.roleTitle}) like ${pattern} escape '\\' or lower(${leaders.roleTitleEn}) like ${pattern} escape '\\')`
+    );
   }
   const condition = where.length ? and(...where) : undefined;
   const orderBy = params.order === "asc" ? asc(SORT_COLUMNS[params.sort]) : desc(SORT_COLUMNS[params.sort]);
   const [rows, [{ total }]] = await Promise.all([
     db
       .select({
-        id: leaders.id, name: leaders.name, slug: leaders.slug, roleTitle: leaders.roleTitle, groupKey: leaders.groupKey, status: leaders.status, sortOrder: leaders.sortOrder,
+        id: leaders.id,
+        name: leaders.name,
+        nameEn: leaders.nameEn,
+        slug: leaders.slug,
+        roleTitle: leaders.roleTitle,
+        roleTitleEn: leaders.roleTitleEn,
+        groupKey: leaders.groupKey,
+        status: leaders.status,
+        sortOrder: leaders.sortOrder,
         photo: { r2Key: media.r2Key, width: media.width, height: media.height, altText: media.altText, variants: media.variants },
       })
       .from(leaders)
@@ -60,7 +71,7 @@ async function LeadersTable({ params, group }: { params: AdminListParams<Sort>; 
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div className="admin-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -87,13 +98,18 @@ async function LeadersTable({ params, group }: { params: AdminListParams<Sort>; 
                   )}
                 </TableCell>
                 <TableCell className="max-w-0 whitespace-normal">
-                  <Link href={`/admin/leaders/${l.id}/`} className="line-clamp-2 font-medium hover:underline">
-                    {l.name}
-                  </Link>
-                  <span className="block text-xs text-muted-foreground">{l.roleTitle}</span>
-                  <a href={routes.leader(l.slug)} target="_blank" rel="noopener" className="text-xs text-muted-foreground hover:underline">
-                    View on site
-                  </a>
+                  <div className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <Link href={`/admin/leaders/${l.id}/`} className="line-clamp-2 font-medium hover:underline">
+                        {l.name || l.nameEn}
+                      </Link>
+                      <span className="block text-xs text-muted-foreground">{l.roleTitle || l.roleTitleEn}</span>
+                      <a href={routes.leader(l.slug)} target="_blank" rel="noopener" className="text-xs text-muted-foreground hover:underline">
+                        View on site
+                      </a>
+                    </div>
+                    <LanguageBadge ml={!!l.name} en={!!l.nameEn} />
+                  </div>
                 </TableCell>
                 <TableCell className="hidden text-sm md:table-cell">{LEADER_GROUP_TITLES[l.groupKey]}</TableCell>
                 <TableCell>

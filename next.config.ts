@@ -23,7 +23,8 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // TranslatePress mirrored every page under /ml/. Content is the same, so send it to the canonical URL.
+      // TranslatePress mirrored every page under /ml/. Malayalam is the default language and keeps the
+      // unprefixed address, so /ml/… goes to the canonical URL (the rewrite below serves it).
       { source: "/ml", destination: "/", permanent: true },
       { source: "/ml/:path+", destination: "/:path+/", permanent: true },
       // Legacy upload URLs (PDF downloads, images linked from other sites) now live in R2.
@@ -38,6 +39,19 @@ const nextConfig: NextConfig = {
       { source: "/wp-admin/:path*", destination: "/admin/", permanent: false },
       { source: "/wp-login.php", destination: "/admin/login/", permanent: false },
     ];
+  },
+  async rewrites() {
+    // The public site renders through app/[lang]. English addresses carry /en/; every other public
+    // address is Malayalam and is served from /ml/… without changing the address in the browser.
+    // afterFiles: public files and static routes (feed, robots.txt, sitemap.xml) are matched first.
+    return {
+      beforeFiles: [],
+      afterFiles: [
+        { source: "/", destination: "/ml/" },
+        { source: "/:path((?!(?:en|ml|admin)(?:/|$)|media/|_next/).+)", destination: "/ml/:path" },
+      ],
+      fallback: [],
+    };
   },
   async headers() {
     const security = [

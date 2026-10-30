@@ -32,7 +32,22 @@ export function paginate<T>(data: T[], total: number, page: number, pageSize: nu
   return { data, page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
 }
 
-/** Escapes LIKE wildcards; use with `ESCAPE '\'`. */
+/** D1 rejects longer LIKE patterns with "LIKE or GLOB pattern too complex". */
+const LIKE_PATTERN_MAX_BYTES = 50;
+const utf8 = new TextEncoder();
+
+/**
+ * Escapes LIKE wildcards; use with `ESCAPE '\'`. Malayalam takes 3 bytes a letter, so a query too
+ * long for D1 is cut to the prefix that fits: it still finds everything the full query would.
+ */
 export function likePattern(q: string): string {
-  return `%${q.toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  let bytes = 2; // the two %s
+  let body = "";
+  for (const ch of q.toLowerCase()) {
+    const token = ch === "\\" || ch === "%" || ch === "_" ? `\\${ch}` : ch;
+    bytes += utf8.encode(token).length;
+    if (bytes > LIKE_PATTERN_MAX_BYTES) break;
+    body += token;
+  }
+  return `%${body}%`;
 }

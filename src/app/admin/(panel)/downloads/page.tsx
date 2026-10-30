@@ -55,7 +55,7 @@ async function DownloadsTable({ params }: { params: AdminListParams<Sort> }) {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div className="admin-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -74,7 +74,7 @@ async function DownloadsTable({ params }: { params: AdminListParams<Sort> }) {
               return (
                 <TableRow key={d.id}>
                   <TableCell className="max-w-0 whitespace-normal">
-                    <p className="line-clamp-2 font-medium">{d.title}</p>
+                    <p className="line-clamp-2 font-medium">{d.title || d.titleEn}</p>
                     {file ? (
                       <a href={mediaUrl(file.r2Key)} target="_blank" rel="noopener" className="inline-flex max-w-full items-center gap-1 text-xs text-muted-foreground hover:underline">
                         <FileText className="size-3 shrink-0" aria-hidden="true" />
@@ -92,9 +92,9 @@ async function DownloadsTable({ params }: { params: AdminListParams<Sort> }) {
                   <TableCell>
                     <div className="flex justify-end gap-1">
                       <DownloadDialog
-                        download={{ id: d.id, file, title: d.title, description: d.description, mediaId: d.mediaId, sortOrder: d.sortOrder, active: d.active }}
+                        download={{ id: d.id, file, title: d.title, titleEn: d.titleEn, description: d.description, descriptionEn: d.descriptionEn, mediaId: d.mediaId, sortOrder: d.sortOrder, active: d.active }}
                         trigger={
-                          <Button variant="ghost" size="icon" className="size-11 sm:size-9" aria-label={`Edit ${d.title}`}>
+                          <Button variant="ghost" size="icon" className="size-9 sm:size-8" aria-label={`Edit ${d.title}`}>
                             <Pencil className="size-4" aria-hidden="true" />
                           </Button>
                         }
@@ -130,7 +130,7 @@ async function AddDownloadButton() {
     <DownloadDialog
       nextSortOrder={(max ?? -1) + 1}
       trigger={
-        <Button className="h-11 sm:h-9">
+        <Button className="h-9 sm:h-8">
           <Plus className="size-4" aria-hidden="true" /> Add download
         </Button>
       }
@@ -145,7 +145,7 @@ export default async function AdminDownloadsPage({ searchParams }: PageProps<"/a
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">Downloads</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">Downloads</h1>
           <p className="mt-1 text-sm text-muted-foreground">Documents listed on the public Downloads page.</p>
         </div>
         <AddDownloadButton />

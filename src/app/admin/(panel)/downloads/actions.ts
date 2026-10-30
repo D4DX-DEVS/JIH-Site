@@ -27,7 +27,8 @@ export async function saveDownloadAction(id: number | null, values: DownloadForm
     const [created] = await db.insert(downloads).values(row).returning({ id: downloads.id });
     downloadId = created.id;
   }
-  await logActivity(session.actor, id ? "update" : "create", "download", downloadId!, `${id ? "Updated" : "Added"} download “${data.title}”`);
+  const title = data.title || data.titleEn;
+  await logActivity(session.actor, id ? "update" : "create", "download", downloadId!, `${id ? "Updated" : "Added"} download “${title}”`);
   refreshPublic("downloads");
   return { ok: true, id: downloadId!, message: id ? "Download saved" : "Download added" };
 }
@@ -35,9 +36,10 @@ export async function saveDownloadAction(id: number | null, values: DownloadForm
 export async function deleteDownloadAction(id: number): Promise<ActionResult> {
   const session = await requireAdmin();
   const db = await getDb();
-  const [row] = await db.delete(downloads).where(eq(downloads.id, id)).returning({ title: downloads.title });
+  const [row] = await db.delete(downloads).where(eq(downloads.id, id)).returning({ title: downloads.title, titleEn: downloads.titleEn });
   if (!row) return { ok: false, error: "Download not found" };
-  await logActivity(session.actor, "delete", "download", id, `Removed download “${row.title}”`);
+  const title = row.title || row.titleEn;
+  await logActivity(session.actor, "delete", "download", id, `Removed download “${title}”`);
   refreshPublic("downloads");
   return { ok: true, message: "Download removed. The file stays in the media library." };
 }

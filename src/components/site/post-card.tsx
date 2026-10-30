@@ -1,8 +1,10 @@
-import Link from "next/link";
 import { CalendarDays } from "lucide-react";
+import Link from "@/components/i18n/link";
 import { ResponsiveImage } from "@/components/media/responsive-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
+import { langAttr, type Locale } from "@/lib/i18n/config";
+import { getLocale } from "@/lib/i18n/server";
 import { routes } from "@/lib/routes";
 import type { PostSummary } from "@/lib/data/posts";
 import { cn } from "@/lib/utils";
@@ -17,17 +19,17 @@ interface PostCardProps {
   className?: string;
 }
 
-function Meta({ post, light }: { post: PostSummary; light?: boolean }) {
+function Meta({ post, light, locale }: { post: PostSummary; light?: boolean; locale: Locale }) {
   const category = post.categories[0];
   return (
-    <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium", light ? "text-on-navy-soft" : "text-ink-soft")}>
+    <div lang={langAttr(locale, post.lang)} className={cn("flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium", light ? "text-on-navy-soft" : "text-ink-soft")}>
       {category ? (
         <span className={cn("rounded-full px-2.5 py-1", light ? "bg-white/15 text-white" : "bg-maroon/8 text-maroon")}>{category.name}</span>
       ) : null}
       {post.publishedAt ? (
         <span className="inline-flex items-center gap-1.5">
           <CalendarDays className="size-3.5" aria-hidden="true" />
-          <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+          <time dateTime={post.publishedAt}>{formatDate(post.publishedAt, "long", locale)}</time>
         </span>
       ) : null}
     </div>
@@ -35,14 +37,18 @@ function Meta({ post, light }: { post: PostSummary; light?: boolean }) {
 }
 
 /** A post as a card. `feature` overlays the headline on a large picture; `row` is a compact list item. */
-export function PostCard({ post, variant = "card", headingLevel = "h3", priority = false, className }: PostCardProps) {
+export async function PostCard({ post, variant = "card", headingLevel = "h3", priority = false, className }: PostCardProps) {
+  const locale = await getLocale();
+  // Fallback posts (no title in the reader's language) are marked up in their own language; the
+  // category and date line stays in the page's.
+  const lang = langAttr(post.lang, locale);
   const Heading = headingLevel;
   const href = routes.post(post.slug);
   const image = post.featuredMedia;
 
   if (variant === "feature") {
     return (
-      <article className={cn("group card-lift relative isolate flex min-h-[26rem] flex-col justify-end overflow-hidden rounded-2xl bg-navy-deep text-white lg:min-h-[34rem]", className)}>
+      <article lang={lang} className={cn("group card-lift relative isolate flex min-h-[26rem] flex-col justify-end overflow-hidden rounded-2xl bg-navy-deep text-white lg:min-h-[34rem]", className)}>
         {image ? (
           <ResponsiveImage media={image} fallbackAlt="" sizes="(min-width: 1024px) 60vw, 100vw" priority={priority} className="img-zoom absolute inset-0 -z-10 size-full" />
         ) : (
@@ -50,7 +56,7 @@ export function PostCard({ post, variant = "card", headingLevel = "h3", priority
         )}
         <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/50 to-transparent" />
         <div className="space-y-3 p-6 sm:p-8">
-          <Meta post={post} light />
+          <Meta post={post} light locale={locale} />
           <Heading className="line-clamp-3 font-heading text-xl font-extrabold leading-tight wrap-break-word sm:text-2xl xl:text-3xl">
             <Link href={href} className="link-draw after:absolute after:inset-0">
               {post.title}
@@ -64,12 +70,12 @@ export function PostCard({ post, variant = "card", headingLevel = "h3", priority
 
   if (variant === "row") {
     return (
-      <article className={cn("group relative flex gap-4", className)}>
+      <article lang={lang} className={cn("group relative flex gap-4", className)}>
         <div className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-xl bg-mist sm:w-36">
           {image ? <ResponsiveImage media={image} fallbackAlt="" sizes="9rem" className="img-zoom size-full" /> : <div className="lattice-ink size-full" aria-hidden="true" />}
         </div>
         <div className="min-w-0 space-y-2 py-0.5">
-          <Meta post={post} />
+          <Meta post={post} locale={locale} />
           <Heading className="line-clamp-3 font-heading text-base font-bold leading-snug wrap-break-word text-ink transition-colors group-hover:text-navy sm:text-lg">
             <Link href={href} className="after:absolute after:inset-0">
               {post.title}
@@ -81,7 +87,7 @@ export function PostCard({ post, variant = "card", headingLevel = "h3", priority
   }
 
   return (
-    <article className={cn("group card-lift relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-white shadow-soft", className)}>
+    <article lang={lang} className={cn("group card-lift relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-white shadow-soft", className)}>
       <div className="relative aspect-[16/10] overflow-hidden bg-mist">
         {image ? (
           <ResponsiveImage media={image} fallbackAlt="" sizes="(min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw" priority={priority} className="img-zoom size-full" />
@@ -90,7 +96,7 @@ export function PostCard({ post, variant = "card", headingLevel = "h3", priority
         )}
       </div>
       <div className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
-        <Meta post={post} />
+        <Meta post={post} locale={locale} />
         <Heading className="line-clamp-3 font-heading text-lg font-bold leading-snug wrap-break-word text-ink transition-colors group-hover:text-navy sm:text-xl">
           <Link href={href} className="after:absolute after:inset-0">
             {post.title}

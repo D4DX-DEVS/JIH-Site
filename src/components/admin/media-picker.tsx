@@ -138,27 +138,55 @@ export function MediaPickerDialog({ open, onOpenChange, onSelect, kind = "image"
 /** Form field: shows the chosen media and opens the picker. Value is a media id. */
 export function MediaField({ value, preview, onChange, kind = "image", label }: { value: number | null; preview: PickerMedia | null; onChange: (media: PickerMedia | null) => void; kind?: "image" | "document"; label: string }) {
   const [open, setOpen] = useState(false);
-  return (
-    <div className="space-y-2">
-      {value && preview ? (
-        <div className="flex items-center gap-3 rounded-md border p-2">
-          {preview.kind === "image" ? (
-            <img src={pickVariant(preview, 300)} alt="" className="size-16 rounded object-cover" />
-          ) : (
-            <span className="flex size-16 items-center justify-center rounded bg-muted"><FileText className="size-6" aria-hidden="true" /></span>
-          )}
+  const name = label.toLowerCase();
+  const KindIcon = kind === "image" ? ImagePlus : FileText;
+  const picker = <MediaPickerDialog open={open} onOpenChange={setOpen} onSelect={(m) => onChange(m)} kind={kind} title={`Choose ${name}`} />;
+
+  // Chosen: the picture itself, large, with its name and the two things you can do to it.
+  if (value && preview) {
+    const isImage = preview.kind === "image";
+    return (
+      <div className="overflow-hidden rounded-lg border border-border">
+        {isImage ? (
+          <a href={mediaUrl(preview.r2Key)} target="_blank" rel="noopener" className="block bg-[var(--admin-frame)]">
+            <img src={pickVariant(preview, 600)} alt="" className="aspect-video w-full object-contain" />
+          </a>
+        ) : null}
+        <div className={cn("flex items-center gap-1 p-1.5 pl-3", isImage && "border-t border-[var(--admin-rule)]")}>
+          {isImage ? null : <FileText className="mr-1 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
           <a href={mediaUrl(preview.r2Key)} target="_blank" rel="noopener" className="min-w-0 flex-1 truncate text-sm underline-offset-4 hover:underline">
             {preview.title || preview.r2Key.split("/").pop()}
           </a>
-          <Button type="button" variant="ghost" size="icon" className="size-11 sm:size-9" onClick={() => onChange(null)} aria-label={`Remove ${label.toLowerCase()}`}>
+          <Button type="button" variant="ghost" size="sm" className="h-11 px-2.5 sm:h-8" onClick={() => setOpen(true)}>
+            Change
+          </Button>
+          <Button type="button" variant="ghost" size="icon" className="size-11 text-muted-foreground hover:text-destructive sm:size-8" onClick={() => onChange(null)} aria-label={`Remove ${name}`}>
             <X className="size-4" aria-hidden="true" />
           </Button>
         </div>
-      ) : null}
-      <Button type="button" variant="outline" className="h-11 sm:h-9" onClick={() => setOpen(true)}>
-        <ImagePlus className="size-4" aria-hidden="true" /> {value ? `Change ${label.toLowerCase()}` : `Choose ${label.toLowerCase()}`}
-      </Button>
-      <MediaPickerDialog open={open} onOpenChange={setOpen} onSelect={(m) => onChange(m)} kind={kind} title={`Choose ${label.toLowerCase()}`} />
-    </div>
+        {picker}
+      </div>
+    );
+  }
+
+  // Empty: the slot the file will fill, as one large target.
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={cn(
+          "flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-input bg-[var(--admin-frame)] px-4 text-center transition-colors outline-none hover:border-ring/50 hover:bg-[var(--admin-sky)] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/15",
+          kind === "image" ? "aspect-video" : "py-6",
+        )}
+      >
+        <span className="mb-1 flex size-10 items-center justify-center rounded-full bg-card text-primary shadow-sm">
+          <KindIcon className="size-5" aria-hidden="true" />
+        </span>
+        <span className="text-sm font-medium">{value ? `Change ${name}` : `Choose ${name}`}</span>
+        <span className="text-xs text-muted-foreground">From the library, or upload a new one</span>
+      </button>
+      {picker}
+    </>
   );
 }

@@ -4,11 +4,13 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ExternalLink, Loader2, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Panel } from "@/components/admin/admin-ui";
 import { ConfirmAction } from "@/components/admin/confirm-action";
+import { SaveActions, StatusToggle } from "@/components/admin/publish-controls";
 import { Field, describedBy } from "@/components/admin/form-bits";
+import { LanguageTabs, LanguageTab } from "@/components/admin/language-tabs";
 import { MediaField } from "@/components/admin/media-picker";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { Button } from "@/components/ui/button";
@@ -32,7 +34,7 @@ export function LeaderForm({ id, initial, photo: initialPhoto, groups }: LeaderF
   const [pending, startTransition] = useTransition();
   const [photo, setPhoto] = useState(initialPhoto);
   const form = useForm<LeaderFormValues>({ resolver: zodResolver(leaderSchema), defaultValues: initial });
-  const { errors } = form.formState;
+  const { errors, isDirty } = form.formState;
 
   const onSubmit = form.handleSubmit((values) =>
     startTransition(async () => {
@@ -53,26 +55,51 @@ export function LeaderForm({ id, initial, photo: initialPhoto, groups }: LeaderF
     <form onSubmit={onSubmit} noValidate className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="space-y-6">
         <Panel title="Profile">
-          <div className="space-y-4">
-            <Field id="name" label="Name" error={errors.name?.message}>
-              <Input id="name" className="h-11 text-base" aria-invalid={!!errors.name} aria-describedby={describedBy("name", errors.name?.message)} {...form.register("name")} />
-            </Field>
-            <Field id="roleTitle" label="Role" error={errors.roleTitle?.message} hint="For example: Secretary, Shoora member.">
-              <Input id="roleTitle" className="h-11" aria-describedby={describedBy("roleTitle", errors.roleTitle?.message, "x")} {...form.register("roleTitle")} />
-            </Field>
-            <Field id="slug" label="URL slug" error={errors.slug?.message} hint="Leave empty to create one from the name. Changing it changes the public URL.">
-              <Input id="slug" className="h-11" aria-invalid={!!errors.slug} aria-describedby={describedBy("slug", errors.slug?.message, "x")} {...form.register("slug")} />
-            </Field>
-            <div className="space-y-2">
-              <span className="text-sm font-medium">Biography</span>
-              <Controller
-                control={form.control}
-                name="bioHtml"
-                render={({ field }) => <RichTextEditor value={field.value ?? ""} onChange={field.onChange} label="Biography" invalid={!!errors.bioHtml} />}
-              />
-              {errors.bioHtml ? <p className="text-sm text-destructive">{errors.bioHtml.message}</p> : null}
-            </div>
-          </div>
+          <LanguageTabs>
+            <LanguageTab value="ml">
+              <div className="space-y-4">
+                <Field id="name" label="Name" error={errors.name?.message}>
+                  <Input id="name" className="h-10 text-base" aria-invalid={!!errors.name} aria-describedby={describedBy("name", errors.name?.message)} {...form.register("name")} />
+                </Field>
+                <Field id="roleTitle" label="Role" error={errors.roleTitle?.message} hint="For example: Secretary, Shoora member.">
+                  <Input id="roleTitle" className="h-10" aria-describedby={describedBy("roleTitle", errors.roleTitle?.message, "x")} {...form.register("roleTitle")} />
+                </Field>
+                <div className="space-y-2">
+                  <span className="text-sm font-medium">Biography</span>
+                  <Controller
+                    control={form.control}
+                    name="bioHtml"
+                    render={({ field }) => <RichTextEditor value={field.value ?? ""} onChange={field.onChange} label="Biography" invalid={!!errors.bioHtml} />}
+                  />
+                  {errors.bioHtml ? <p className="text-sm text-destructive">{errors.bioHtml.message}</p> : null}
+                </div>
+              </div>
+            </LanguageTab>
+            <LanguageTab value="en">
+              <div className="space-y-4">
+                <Field id="nameEn" label="Name" error={errors.nameEn?.message}>
+                  <Input id="nameEn" className="h-10 text-base" aria-invalid={!!errors.nameEn} aria-describedby={describedBy("nameEn", errors.nameEn?.message)} {...form.register("nameEn")} />
+                </Field>
+                <Field id="roleTitleEn" label="Role" error={errors.roleTitleEn?.message} hint="For example: Secretary, Shoora member.">
+                  <Input id="roleTitleEn" className="h-10" aria-describedby={describedBy("roleTitleEn", errors.roleTitleEn?.message, "x")} {...form.register("roleTitleEn")} />
+                </Field>
+                <div className="space-y-2">
+                  <span className="text-sm font-medium">Biography</span>
+                  <Controller
+                    control={form.control}
+                    name="bioHtmlEn"
+                    render={({ field }) => <RichTextEditor value={field.value ?? ""} onChange={field.onChange} label="Biography" invalid={!!errors.bioHtmlEn} />}
+                  />
+                  {errors.bioHtmlEn ? <p className="text-sm text-destructive">{errors.bioHtmlEn.message}</p> : null}
+                </div>
+              </div>
+            </LanguageTab>
+          </LanguageTabs>
+        </Panel>
+        <Panel title="URL slug" description="Leave empty to create one from the name. Changing it changes the public URL.">
+          <Field id="slug" label="Slug" error={errors.slug?.message}>
+            <Input id="slug" className="h-10" aria-invalid={!!errors.slug} aria-describedby={describedBy("slug", errors.slug?.message)} {...form.register("slug")} />
+          </Field>
         </Panel>
       </div>
 
@@ -80,21 +107,7 @@ export function LeaderForm({ id, initial, photo: initialPhoto, groups }: LeaderF
         <Panel title="Publish">
           <div className="space-y-4">
             <Field id="status" label="Status" error={errors.status?.message}>
-              <Controller
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="status" className="h-11 w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
+              <Controller control={form.control} name="status" render={({ field }) => <StatusToggle id="status" value={field.value} onChange={field.onChange} />} />
             </Field>
             <Field id="groupKey" label="Group" error={errors.groupKey?.message}>
               <Controller
@@ -102,7 +115,7 @@ export function LeaderForm({ id, initial, photo: initialPhoto, groups }: LeaderF
                 name="groupKey"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="groupKey" className="h-11 w-full">
+                    <SelectTrigger id="groupKey" className="h-10 w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -117,21 +130,9 @@ export function LeaderForm({ id, initial, photo: initialPhoto, groups }: LeaderF
               />
             </Field>
             <Field id="sortOrder" label="Order" error={errors.sortOrder?.message} hint="Lower numbers come first within the group.">
-              <Input id="sortOrder" type="number" inputMode="numeric" min={0} className="h-11" aria-describedby={describedBy("sortOrder", errors.sortOrder?.message, "x")} {...form.register("sortOrder", { valueAsNumber: true })} />
+              <Input id="sortOrder" type="number" inputMode="numeric" min={0} className="h-10" aria-describedby={describedBy("sortOrder", errors.sortOrder?.message, "x")} {...form.register("sortOrder", { valueAsNumber: true })} />
             </Field>
-            <div className="flex flex-wrap gap-2">
-              <Button type="submit" className="h-11 flex-1" disabled={pending}>
-                {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-                {pending ? "Saving…" : "Save"}
-              </Button>
-              {id && initial.slug ? (
-                <Button asChild variant="outline" className="h-11">
-                  <a href={routes.leader(initial.slug)} target="_blank" rel="noopener">
-                    <ExternalLink className="size-4" aria-hidden="true" /> View
-                  </a>
-                </Button>
-              ) : null}
-            </div>
+            <SaveActions pending={pending} saved={!!id} dirty={isDirty} viewHref={id && initial.slug ? routes.leader(initial.slug) : null} />
           </div>
         </Panel>
         <Panel title="Photo">
@@ -154,7 +155,7 @@ export function LeaderForm({ id, initial, photo: initialPhoto, groups }: LeaderF
         {id ? (
           <ConfirmAction
             trigger={
-              <Button type="button" variant="outline" className="h-11 w-full text-destructive">
+              <Button type="button" variant="outline" className="h-10 w-full border-destructive/25 text-destructive hover:bg-destructive/5 hover:text-destructive">
                 <Trash2 className="size-4" aria-hidden="true" /> Remove leader
               </Button>
             }

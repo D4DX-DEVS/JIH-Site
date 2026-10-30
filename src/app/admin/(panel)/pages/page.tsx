@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { and, asc, desc, eq, sql, type SQL } from "drizzle-orm";
 import { AdminEmptyState, PageHeader, StatusBadge, TableSkeleton } from "@/components/admin/admin-ui";
+import { LanguageBadge } from "@/components/admin/language-badge";
 import { DataPagination } from "@/components/admin/data-pagination";
 import { ListToolbar } from "@/components/admin/list-toolbar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -32,7 +33,7 @@ async function PagesTable({ params, section }: { params: AdminListParams<Sort>; 
   const orderBy = params.order === "asc" ? asc(SORT_COLUMNS[params.sort]) : desc(SORT_COLUMNS[params.sort]);
   const [rows, [{ total }]] = await Promise.all([
     db
-      .select({ id: pages.id, title: pages.title, slug: pages.slug, status: pages.status, section: pages.section, template: pages.template, updatedAt: pages.updatedAt })
+      .select({ id: pages.id, title: pages.title, titleEn: pages.titleEn, mlBody: sql<number>`length(trim(${pages.contentHtml}))`, enBody: sql<number>`length(trim(${pages.contentHtmlEn}))`, slug: pages.slug, status: pages.status, section: pages.section, template: pages.template, updatedAt: pages.updatedAt })
       .from(pages)
       .where(condition)
       .orderBy(orderBy, desc(pages.id))
@@ -52,7 +53,7 @@ async function PagesTable({ params, section }: { params: AdminListParams<Sort>; 
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div className="admin-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -68,11 +69,13 @@ async function PagesTable({ params, section }: { params: AdminListParams<Sort>; 
               <TableRow key={p.id}>
                 <TableCell className="max-w-0 whitespace-normal">
                   <Link href={`/admin/pages/${p.id}/`} className="line-clamp-2 font-medium hover:underline">
-                    {p.title}
+                    {p.title || p.titleEn}
                   </Link>
                   <a href={routes.page(p.slug)} target="_blank" rel="noopener" className="text-xs text-muted-foreground hover:underline">
                     View on site
                   </a>
+                  {/* A page counts as written in a language when its body is, or (for hubs without a body) its title. */}
+                  <LanguageBadge ml={p.mlBody > 0 || (!p.enBody && !!p.title)} en={p.enBody > 0 || (!p.mlBody && !!p.titleEn)} />
                 </TableCell>
                 <TableCell className="hidden text-sm md:table-cell">{SECTION_LABELS[p.section]}</TableCell>
                 <TableCell className="hidden text-sm text-muted-foreground lg:table-cell">{TEMPLATE_LABELS[p.template]}</TableCell>

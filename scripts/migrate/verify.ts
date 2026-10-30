@@ -139,11 +139,11 @@ await compare("gallery", "image-gallery", schema.galleries, async (present, sour
   rows.push({ type: "media", discovered: source.length, inDatabase: media.filter((m) => m.wpId).length, ...ledger, verified, notes });
 }
 
-// Content: every /media/uploads/ reference resolves in R2; no links left on the old hosts.
+// Content: every /media/uploads/ reference resolves in R2; no links left on the old hosts. Both languages.
 const contentRows = [
-  ...(await db.select({ kind: sql<string>`'post'`, slug: schema.posts.slug, html: schema.posts.contentHtml }).from(schema.posts)),
-  ...(await db.select({ kind: sql<string>`'page'`, slug: schema.pages.slug, html: schema.pages.contentHtml }).from(schema.pages)),
-  ...(await db.select({ kind: sql<string>`'leader'`, slug: schema.leaders.slug, html: schema.leaders.bioHtml }).from(schema.leaders)),
+  ...(await db.select({ kind: sql<string>`'post'`, slug: schema.posts.slug, html: sql<string>`${schema.posts.contentHtml} || ' ' || ${schema.posts.contentHtmlEn}` }).from(schema.posts)),
+  ...(await db.select({ kind: sql<string>`'page'`, slug: schema.pages.slug, html: sql<string>`${schema.pages.contentHtml} || ' ' || ${schema.pages.contentHtmlEn}` }).from(schema.pages)),
+  ...(await db.select({ kind: sql<string>`'leader'`, slug: schema.leaders.slug, html: sql<string>`${schema.leaders.bioHtml} || ' ' || ${schema.leaders.bioHtmlEn}` }).from(schema.leaders)),
 ];
 let references = 0;
 const brokenRefs = new Set<string>();

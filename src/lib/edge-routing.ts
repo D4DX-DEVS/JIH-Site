@@ -5,11 +5,13 @@
  * headers have gone out, so visitors get a 200 and a client-side redirect. Legacy redirects and the
  * admin sign-in gate set the status code search engines and browsers act on, so the Worker answers
  * them first, and marks the not-found renders of those routes as 404s. The rules mirror the app routes:
- * a stored redirect applies only where Next.js would have reached `(site)/[slug]` (and found no
- * content) or `(site)/[slug]/[...rest]`; with no redirect either, those pages can only render not-found.
- * Under `next dev` / `next start` the same redirects still run inside those pages.
+ * a stored redirect applies only where Next.js would have reached `[lang]/[slug]` (and found no
+ * content) or `[lang]/[slug]/[...rest]`; with no redirect either, those pages can only render not-found.
+ * English addresses (/en/…) follow the same rules on the path after the prefix, and their redirects
+ * stay in English. Under `next dev` / `next start` the same redirects still run inside those pages.
  */
 import { ADMIN_SESSION_COOKIE } from "./auth/cookie";
+import { EN_PREFIX, localizePath, type Locale } from "./i18n/config";
 import { decodeSegment } from "./slug";
 
 /** Files served at the root by metadata routes (src/app/robots.ts, sitemap.ts, icon.png, apple-icon.png). */
@@ -103,7 +105,10 @@ export async function routeAtEdge(request: Request, db: D1Database): Promise<Edg
     return { kind: "respond", response: redirectTo("/admin/login/", 307) };
   }
 
-  const scope = redirectScope(url.pathname);
+  // Only /en/ is stripped: /ml/… is a next.config redirect, which redirectScope leaves to Next.js.
+  const english = url.pathname === EN_PREFIX || url.pathname.startsWith(`${EN_PREFIX}/`);
+  const locale: Locale = english ? "en" : "ml";
+  const scope = redirectScope(english ? url.pathname.slice(EN_PREFIX.length) || "/" : url.pathname);
   if (!scope) return RENDER;
   let row: LookupRow | null;
   try {
@@ -115,7 +120,7 @@ export async function routeAtEdge(request: Request, db: D1Database): Promise<Edg
   if (row?.hasContent) return RENDER;
   if (row?.toPath) {
     const location = redirectLocation(row.toPath, url);
-    return location ? { kind: "respond", response: redirectTo(location, redirectStatus(row.statusCode ?? 301)) } : RENDER;
+    return location ? { kind: "respond", response: redirectTo(localizePath(location, locale), redirectStatus(row.statusCode ?? 301)) } : RENDER;
   }
   // Client navigations (RSC requests) keep their status so the router can render the not-found UI in place.
   return { kind: "render", notFound: !request.headers.has("rsc") };

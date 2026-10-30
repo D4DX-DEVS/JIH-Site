@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { FormDialog, applyFormResult } from "@/components/admin/form-dialog";
 import { Field, describedBy } from "@/components/admin/form-bits";
+import { LanguageTabs, LanguageTab } from "@/components/admin/language-tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,7 +36,7 @@ function CategoryForm({ category, parents, onDone }: { category?: CategoryDialog
   const [pending, startTransition] = useTransition();
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
-    defaultValues: { name: category?.name ?? "", slug: category?.slug ?? "", description: category?.description ?? "", parentId: category?.parentId ?? null },
+    defaultValues: { name: category?.name ?? "", nameEn: category?.nameEn ?? "", slug: category?.slug ?? "", description: category?.description ?? "", descriptionEn: category?.descriptionEn ?? "", parentId: category?.parentId ?? null },
   });
   const { errors } = form.formState;
 
@@ -51,11 +52,30 @@ function CategoryForm({ category, parents, onDone }: { category?: CategoryDialog
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
-      <Field id="cat-name" label="Name" error={errors.name?.message}>
-        <Input id="cat-name" className="h-11" aria-invalid={!!errors.name} aria-describedby={describedBy("cat-name", errors.name?.message)} {...form.register("name")} />
-      </Field>
+      <LanguageTabs>
+        <LanguageTab value="ml">
+          <div className="space-y-4">
+            <Field id="cat-name" label="Name" error={errors.name?.message}>
+              <Input id="cat-name" className="h-9" aria-invalid={!!errors.name} aria-describedby={describedBy("cat-name", errors.name?.message)} {...form.register("name")} />
+            </Field>
+            <Field id="cat-description" label="Description" error={errors.description?.message} hint="Shown at the top of the category archive.">
+              <Textarea id="cat-description" rows={3} aria-describedby={describedBy("cat-description", errors.description?.message, "x")} {...form.register("description")} />
+            </Field>
+          </div>
+        </LanguageTab>
+        <LanguageTab value="en">
+          <div className="space-y-4">
+            <Field id="cat-nameEn" label="Name" error={errors.nameEn?.message}>
+              <Input id="cat-nameEn" className="h-9" aria-invalid={!!errors.nameEn} aria-describedby={describedBy("cat-nameEn", errors.nameEn?.message)} {...form.register("nameEn")} />
+            </Field>
+            <Field id="cat-descriptionEn" label="Description" error={errors.descriptionEn?.message} hint="Shown at the top of the category archive.">
+              <Textarea id="cat-descriptionEn" rows={3} aria-describedby={describedBy("cat-descriptionEn", errors.descriptionEn?.message, "x")} {...form.register("descriptionEn")} />
+            </Field>
+          </div>
+        </LanguageTab>
+      </LanguageTabs>
       <Field id="cat-slug" label="URL slug" error={errors.slug?.message} hint="Leave empty to create one from the name.">
-        <Input id="cat-slug" className="h-11" aria-invalid={!!errors.slug} aria-describedby={describedBy("cat-slug", errors.slug?.message, "x")} {...form.register("slug")} />
+        <Input id="cat-slug" className="h-9" aria-invalid={!!errors.slug} aria-describedby={describedBy("cat-slug", errors.slug?.message, "x")} {...form.register("slug")} />
       </Field>
       <Field id="cat-parent" label="Parent category" error={errors.parentId?.message}>
         <Controller
@@ -63,7 +83,7 @@ function CategoryForm({ category, parents, onDone }: { category?: CategoryDialog
           name="parentId"
           render={({ field }) => (
             <Select value={field.value ? String(field.value) : NONE} onValueChange={(v) => field.onChange(v === NONE ? null : Number(v))}>
-              <SelectTrigger id="cat-parent" className="h-11 w-full" aria-invalid={!!errors.parentId}>
+              <SelectTrigger id="cat-parent" className="h-9 w-full" aria-invalid={!!errors.parentId}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -78,14 +98,11 @@ function CategoryForm({ category, parents, onDone }: { category?: CategoryDialog
           )}
         />
       </Field>
-      <Field id="cat-description" label="Description" error={errors.description?.message} hint="Shown at the top of the category archive.">
-        <Textarea id="cat-description" rows={3} aria-describedby={describedBy("cat-description", errors.description?.message, "x")} {...form.register("description")} />
-      </Field>
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" className="h-11 sm:h-9" onClick={onDone} disabled={pending}>
+        <Button type="button" variant="outline" className="h-9 sm:h-8" onClick={onDone} disabled={pending}>
           Cancel
         </Button>
-        <Button type="submit" className="h-11 sm:h-9" disabled={pending}>
+        <Button type="submit" className="h-9 sm:h-8" disabled={pending}>
           {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
           {pending ? "Saving…" : "Save"}
         </Button>

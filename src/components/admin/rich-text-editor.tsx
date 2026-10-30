@@ -16,7 +16,7 @@ import { MediaPickerDialog } from "./media-picker";
 
 function ToolButton({ label, active, disabled, onClick, children }: { label: string; active?: boolean; disabled?: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <Button type="button" variant="ghost" size="icon" className={cn("size-11 sm:size-9", active && "bg-muted text-primary")} aria-label={label} aria-pressed={active} disabled={disabled} onClick={onClick}>
+    <Button type="button" variant="ghost" size="icon" className={cn("size-11 rounded-md text-muted-foreground hover:text-foreground sm:size-8", active && "bg-[var(--admin-sky)] text-primary hover:bg-[var(--admin-sky-deep)] hover:text-primary")} aria-label={label} aria-pressed={active} disabled={disabled} onClick={onClick}>
       {children}
     </Button>
   );
@@ -34,7 +34,7 @@ function LinkButton({ editor }: { editor: Editor }) {
   return (
     <Popover open={open} onOpenChange={(o) => { setOpen(o); if (o) setHref(editor.getAttributes("link").href ?? ""); }}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="ghost" size="icon" className={cn("size-11 sm:size-9", editor.isActive("link") && "bg-muted text-primary")} aria-label="Link">
+        <Button type="button" variant="ghost" size="icon" className={cn("size-11 rounded-md text-muted-foreground hover:text-foreground sm:size-8", editor.isActive("link") && "bg-[var(--admin-sky)] text-primary hover:bg-[var(--admin-sky-deep)] hover:text-primary")} aria-label="Link">
           <LinkIcon className="size-4" aria-hidden="true" />
         </Button>
       </PopoverTrigger>
@@ -91,11 +91,17 @@ export function RichTextEditor({ value, onChange, label, invalid }: { value: str
         : null,
   });
 
-  if (!editor || !state) return <div className="min-h-96 rounded-md border bg-muted/30" aria-busy="true" />;
+  if (!editor || !state)
+    return (
+      <div className="overflow-hidden rounded-lg border border-input" aria-busy="true">
+        <div className="h-11 border-b border-[var(--admin-rule)] bg-[var(--admin-frame)]" />
+        <div className="min-h-80 animate-pulse bg-muted/30" />
+      </div>
+    );
 
   return (
-    <div className={cn("overflow-hidden rounded-md border bg-background focus-within:ring-2 focus-within:ring-ring", invalid && "border-destructive")}>
-      <div role="toolbar" aria-label={`${label} formatting`} className="flex flex-wrap gap-0.5 border-b bg-muted/40 p-1">
+    <div className={cn("overflow-hidden rounded-lg border border-input bg-card transition-[border-color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/15", invalid && "border-destructive")}>
+      <div role="toolbar" aria-label={`${label} formatting`} className="flex flex-wrap items-center gap-0.5 border-b border-[var(--admin-rule)] bg-[var(--admin-frame)] p-1.5">
         <ToolButton label="Bold" active={state.bold} onClick={() => editor.chain().focus().toggleBold().run()}><Bold className="size-4" aria-hidden="true" /></ToolButton>
         <ToolButton label="Italic" active={state.italic} onClick={() => editor.chain().focus().toggleItalic().run()}><Italic className="size-4" aria-hidden="true" /></ToolButton>
         <ToolButton label="Heading" active={state.h2} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 className="size-4" aria-hidden="true" /></ToolButton>

@@ -23,6 +23,7 @@
     "migrate:crawl": "node scripts/migrate/crawl.mjs",
     "migrate:import": "tsx scripts/migrate/import.ts",
     "migrate:verify": "tsx scripts/migrate/verify.ts",
+    "migrate:split-languages": "tsx scripts/migrate/split-languages.ts",
     "admin:hash-password": "tsx scripts/hash-password.ts",
     "admin:hash-env-password": "tsx scripts/hash-env-password.ts"
   },

@@ -28,15 +28,17 @@ export default async function EditVideoPage({ params }: PageProps<"/admin/videos
         <Link href="/admin/videos/" className="inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="size-4" aria-hidden="true" /> Videos
         </Link>
-        <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{video ? "Edit video" : "Add video"}</h1>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">{video ? "Edit video" : "Add video"}</h1>
       </div>
       <VideoForm
         id={id}
         initial={{
           title: video?.title ?? "",
+          titleEn: video?.titleEn ?? "",
           slug: video?.slug ?? "",
           youtube: video ? `https://www.youtube.com/watch?v=${video.youtubeId}` : "",
           description: video?.description ?? "",
+          descriptionEn: video?.descriptionEn ?? "",
           status: video?.status ?? "published",
           publishedAt: video?.publishedAt ?? "",
         }}

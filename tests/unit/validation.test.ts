@@ -25,7 +25,7 @@ describe("admin list params", () => {
 
 describe("admin schemas", () => {
   it("derives a slug from Malayalam input", () => {
-    const r = postSchema.parse({ title: "A title", slug: "  പുതിയ വാർത്ത! ", status: "draft" });
+    const r = postSchema.parse({ title: "A title", titleEn: "", slug: "  പുതിയ വാർത്ത! ", status: "draft" });
     expect(r.slug).toBe("പുതിയ-വാർത്ത");
   });
 
@@ -43,14 +43,14 @@ describe("admin schemas", () => {
   });
 
   it("refuses script URLs in menu links", () => {
-    expect(navItemSchema.safeParse({ menu: "header", label: "x", url: "javascript:alert(1)" }).success).toBe(false);
-    expect(navItemSchema.safeParse({ menu: "header", label: "x", url: "/about-us/" }).success).toBe(true);
+    expect(navItemSchema.safeParse({ menu: "header", label: "x", labelEn: "", url: "javascript:alert(1)" }).success).toBe(false);
+    expect(navItemSchema.safeParse({ menu: "header", label: "x", labelEn: "", url: "/about-us/" }).success).toBe(true);
   });
 
   it("refuses protocol-relative targets, which browsers treat as other sites", () => {
     for (const toPath of ["//evil.example/x", "/\\evil.example/x"]) {
       expect(redirectSchema.safeParse({ fromPath: "/a", toPath, statusCode: 301 }).success, toPath).toBe(false);
-      expect(navItemSchema.safeParse({ menu: "header", label: "x", url: toPath }).success, toPath).toBe(false);
+      expect(navItemSchema.safeParse({ menu: "header", label: "x", labelEn: "", url: toPath }).success, toPath).toBe(false);
     }
     expect(redirectSchema.safeParse({ fromPath: "/a", toPath: "HTTPS://example.org/", statusCode: 301 }).success).toBe(true);
   });

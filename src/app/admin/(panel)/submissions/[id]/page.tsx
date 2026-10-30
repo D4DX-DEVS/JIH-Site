@@ -31,7 +31,7 @@ export default async function SubmissionPage({ params }: PageProps<"/admin/submi
           <ChevronLeft className="size-4" aria-hidden="true" /> Submissions
         </Link>
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{s.subject || `Message from ${s.name}`}</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">{s.subject || `Message from ${s.name}`}</h1>
           <StatusBadge status={s.status} />
         </div>
         <p className="mt-1 text-sm text-muted-foreground">Received {formatDateTime(s.createdAt)} IST</p>

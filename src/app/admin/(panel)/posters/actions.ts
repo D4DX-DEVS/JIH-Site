@@ -27,7 +27,8 @@ export async function savePosterAction(id: number | null, values: PosterFormValu
     const [created] = await db.insert(posters).values(row).returning({ id: posters.id });
     posterId = created.id;
   }
-  await logActivity(session.actor, id ? "update" : "create", "poster", posterId!, `${id ? "Updated" : "Added"} poster${data.title ? ` “${data.title}”` : ` #${posterId}`}`);
+  const title = data.title || data.titleEn;
+  await logActivity(session.actor, id ? "update" : "create", "poster", posterId!, `${id ? "Updated" : "Added"} poster${title ? ` “${title}”` : ` #${posterId}`}`);
   refreshPublic("posters");
   return { ok: true, id: posterId!, message: id ? "Poster saved" : "Poster added" };
 }
@@ -35,9 +36,10 @@ export async function savePosterAction(id: number | null, values: PosterFormValu
 export async function deletePosterAction(id: number): Promise<ActionResult> {
   const session = await requireAdmin();
   const db = await getDb();
-  const [row] = await db.delete(posters).where(eq(posters.id, id)).returning({ title: posters.title });
+  const [row] = await db.delete(posters).where(eq(posters.id, id)).returning({ title: posters.title, titleEn: posters.titleEn });
   if (!row) return { ok: false, error: "Poster not found" };
-  await logActivity(session.actor, "delete", "poster", id, `Removed poster${row.title ? ` “${row.title}”` : ` #${id}`}`);
+  const title = row.title || row.titleEn;
+  await logActivity(session.actor, "delete", "poster", id, `Removed poster${title ? ` “${title}”` : ` #${id}`}`);
   refreshPublic("posters");
   return { ok: true, message: "Poster removed. The image stays in the media library." };
 }

@@ -1,11 +1,21 @@
-const dateFormat = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" });
-const shortDate = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
+import type { Locale } from "./i18n/config";
 
-export function formatDate(iso: string | null | undefined, style: "long" | "short" = "long"): string {
+const dateFormatters: Record<Locale, Record<"long" | "short", Intl.DateTimeFormat>> = {
+  en: {
+    long: new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" }),
+    short: new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" }),
+  },
+  ml: {
+    long: new Intl.DateTimeFormat("ml-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" }),
+    short: new Intl.DateTimeFormat("ml-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" }),
+  },
+};
+
+export function formatDate(iso: string | null | undefined, style: "long" | "short" = "long", locale: Locale = "en"): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return (style === "long" ? dateFormat : shortDate).format(d);
+  return dateFormatters[locale][style].format(d);
 }
 
 export function formatBytes(bytes: number): string {

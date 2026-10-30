@@ -52,7 +52,7 @@ async function RedirectsTable({ params }: { params: AdminListParams<Sort> }) {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div className="admin-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -83,7 +83,7 @@ async function RedirectsTable({ params }: { params: AdminListParams<Sort> }) {
                     <RedirectDialog
                       redirect={{ id: r.id, fromPath: r.fromPath, toPath: r.toPath, statusCode: r.statusCode as 301 | 302 | 307 | 308 }}
                       trigger={
-                        <Button variant="ghost" size="icon" className="size-11 sm:size-9" aria-label={`Edit redirect from ${r.fromPath}`}>
+                        <Button variant="ghost" size="icon" className="size-9 sm:size-8" aria-label={`Edit redirect from ${r.fromPath}`}>
                           <Pencil className="size-4" aria-hidden="true" />
                         </Button>
                       }
@@ -118,12 +118,12 @@ export default async function AdminRedirectsPage({ searchParams }: PageProps<"/a
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">Redirects</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">Redirects</h1>
           <p className="mt-1 text-sm text-muted-foreground">Old addresses that forward to new ones. Fixed WordPress patterns (/wp-content/, /ml/, /blog/) are handled in code.</p>
         </div>
         <RedirectDialog
           trigger={
-            <Button className="h-11 sm:h-9">
+            <Button className="h-9 sm:h-8">
               <Plus className="size-4" aria-hidden="true" /> Add redirect
             </Button>
           }

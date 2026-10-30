@@ -4,6 +4,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { RequestTime } from "@/components/shared/request-time";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSettings } from "@/lib/data/settings";
+import { getI18n } from "@/lib/i18n/server";
 import { SocialIcon } from "./social-icons";
 
 /**
@@ -11,7 +12,8 @@ import { SocialIcon } from "./social-icons";
  * movement, and the credit line. Every page link already sits in the header menu.
  */
 async function FooterBody() {
-  const { contact, social, site } = await getSettings();
+  const { locale, t } = await getI18n();
+  const { contact, social, site } = await getSettings(locale);
   const socials = (
     [
       { href: social.facebook, label: "Facebook", network: "facebook" },
@@ -25,7 +27,7 @@ async function FooterBody() {
   return (
     <>
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
-        <Image src="/brand/logo-white.png" alt="Jamaat-e-Islami Hind Kerala" width={768} height={225} className="h-9 w-auto self-start lg:self-center" />
+        <Image src="/brand/logo-white.png" alt={t.meta.siteName} width={768} height={225} className="h-9 w-auto self-start lg:self-center" />
 
         <address className="grid gap-2 text-sm not-italic text-on-navy-soft lg:flex lg:flex-wrap lg:items-center lg:gap-x-6">
           {contact.phone ? (
@@ -49,14 +51,14 @@ async function FooterBody() {
         </address>
 
         {socials.length ? (
-          <ul className="flex gap-2" aria-label="Social media">
+          <ul className="flex gap-2" aria-label={t.footer.social}>
             {socials.map(({ href, label, network }) => (
               <li key={network}>
                 <a
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`${label} (opens in a new tab)`}
+                  aria-label={`${label} ${t.common.newTab}`}
                   title={label}
                   className="inline-flex size-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-200 hover:bg-white hover:text-navy"
                 >
@@ -70,13 +72,13 @@ async function FooterBody() {
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-2xl bg-white/[0.05] px-4 py-3 text-sm text-on-navy-soft">
         <p>
-          © {new Date().getFullYear()} {site.copyright || site.shortName}. All rights reserved.
+          © {new Date().getFullYear()} {site.copyright || site.shortName}. {t.footer.allRightsReserved}.
         </p>
         <a href="https://d4dx.co" target="_blank" rel="noopener" className="inline-flex min-h-10 items-center gap-2 transition-colors hover:text-white">
-          Powered by
+          {t.footer.poweredBy}
           <Image src="/brand/d4dx-logo-white.png" alt="D4DX" width={444} height={119} className="h-4 w-auto" />
           Innovations LLP
-          <span className="sr-only">(opens in a new tab)</span>
+          <span className="sr-only"> {t.common.newTab}</span>
         </a>
       </div>
     </>

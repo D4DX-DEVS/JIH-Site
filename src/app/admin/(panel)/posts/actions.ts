@@ -21,26 +21,33 @@ export async function savePostAction(id: number | null, values: PostFormValues):
   }
   const data = parsed.data;
   const db = await getDb();
-  const slug = slugOrTitle(data.slug, slugify(data.title));
+  const slug = slugOrTitle(data.slug, slugify(data.title || data.titleEn));
   const slugError = await rootSlugError(db, slug, { table: "posts", id: id ?? undefined });
   if (slugError) return { ok: false, error: slugError, fieldErrors: { slug: slugError } };
 
   const contentHtml = sanitizeRichText(data.contentHtml);
+  const contentHtmlEn = sanitizeRichText(data.contentHtmlEn);
   const text = htmlToText(contentHtml);
+  const textEn = htmlToText(contentHtmlEn);
   const now = new Date().toISOString();
   const publishedAt = data.publishedAt ? new Date(data.publishedAt).toISOString() : data.status === "published" ? now : null;
   const values_ = {
     title: data.title,
+    titleEn: data.titleEn,
     slug,
     status: data.status,
     publishedAt,
     excerpt: data.excerpt || truncateText(text, 300),
+    excerptEn: data.excerptEn || truncateText(textEn, 300),
     contentHtml,
-    searchText: `${data.title} ${text}`.toLowerCase(),
+    contentHtmlEn,
+    searchText: `${data.title} ${data.titleEn} ${text} ${textEn}`.toLowerCase(),
     featuredMediaId: data.featuredMediaId,
     isFeatured: data.isFeatured,
     seoTitle: data.seoTitle,
     seoDescription: data.seoDescription,
+    seoTitleEn: data.seoTitleEn,
+    seoDescriptionEn: data.seoDescriptionEn,
     updatedAt: now,
   };
 
@@ -58,7 +65,7 @@ export async function savePostAction(id: number | null, values: PostFormValues):
   await db.delete(postCategories).where(eq(postCategories.postId, postId!));
   for (const categoryId of new Set(data.categoryIds)) await db.insert(postCategories).values({ postId: postId!, categoryId }).onConflictDoNothing();
 
-  await logActivity(session.actor, id ? "update" : "create", "post", postId!, `${id ? "Updated" : "Created"} post “${data.title}”`);
+  await logActivity(session.actor, id ? "update" : "create", "post", postId!, `${id ? "Updated" : "Created"} post “${data.title || data.titleEn}”`);
   refreshPublic("posts", "categories", `post:${slug}`, ...(previousSlug && previousSlug !== slug ? [`post:${previousSlug}` as const] : []));
   return { ok: true, id: postId!, slug };
 }
@@ -66,9 +73,10 @@ export async function savePostAction(id: number | null, values: PostFormValues):
 export async function deletePostAction(id: number): Promise<ActionResult> {
   const session = await requireAdmin();
   const db = await getDb();
-  const [row] = await db.delete(posts).where(eq(posts.id, id)).returning({ title: posts.title, slug: posts.slug });
+  const [row] = await db.delete(posts).where(eq(posts.id, id)).returning({ title: posts.title, titleEn: posts.titleEn, slug: posts.slug });
   if (!row) return { ok: false, error: "Post not found" };
-  await logActivity(session.actor, "delete", "post", id, `Deleted post “${row.title}”`);
+  const title = row.title || row.titleEn;
+  await logActivity(session.actor, "delete", "post", id, `Deleted post “${title}”`);
   refreshPublic("posts", "categories", `post:${row.slug}`);
   return { ok: true, message: "Post deleted" };
 }

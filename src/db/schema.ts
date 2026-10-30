@@ -54,7 +54,9 @@ export const categories = sqliteTable(
     wpId: integer("wp_id").unique(),
     slug: text("slug").notNull().unique(),
     name: text("name").notNull(),
+    nameEn: text("name_en").notNull().default(""),
     description: text("description").notNull().default(""),
+    descriptionEn: text("description_en").notNull().default(""),
     parentId: integer("parent_id").references((): AnySQLiteColumn => categories.id, { onDelete: "set null" }),
     sortOrder: integer("sort_order").notNull().default(0),
     ...timestamps,
@@ -70,9 +72,16 @@ export const tags = sqliteTable("tags", {
   ...timestamps,
 });
 
+/**
+ * Content is bilingual. The plain columns hold Malayalam, the site's default language; the `…En`
+ * columns hold English. Either may be empty: the public site then shows the other language with a
+ * notice (see src/lib/i18n/content.ts), never both at once.
+ */
 const seoColumns = {
   seoTitle: text("seo_title").notNull().default(""),
   seoDescription: text("seo_description").notNull().default(""),
+  seoTitleEn: text("seo_title_en").notNull().default(""),
+  seoDescriptionEn: text("seo_description_en").notNull().default(""),
   ogImageId: integer("og_image_id").references(() => media.id, { onDelete: "set null" }),
 };
 
@@ -83,8 +92,12 @@ export const posts = sqliteTable(
     wpId: integer("wp_id").unique(),
     slug: text("slug").notNull().unique(),
     title: text("title").notNull(),
+    titleEn: text("title_en").notNull().default(""),
     excerpt: text("excerpt").notNull().default(""),
+    excerptEn: text("excerpt_en").notNull().default(""),
     contentHtml: text("content_html").notNull().default(""),
+    contentHtmlEn: text("content_html_en").notNull().default(""),
+    /** Lowercased text of both languages. */
     searchText: text("search_text").notNull().default(""),
     featuredMediaId: integer("featured_media_id").references(() => media.id, { onDelete: "set null" }),
     authorName: text("author_name").notNull().default(""),
@@ -139,8 +152,12 @@ export const pages = sqliteTable(
     wpId: integer("wp_id").unique(),
     slug: text("slug").notNull().unique(),
     title: text("title").notNull(),
+    titleEn: text("title_en").notNull().default(""),
     summary: text("summary").notNull().default(""),
+    summaryEn: text("summary_en").notNull().default(""),
     contentHtml: text("content_html").notNull().default(""),
+    contentHtmlEn: text("content_html_en").notNull().default(""),
+    /** Lowercased text of both languages. */
     searchText: text("search_text").notNull().default(""),
     featuredMediaId: integer("featured_media_id").references(() => media.id, { onDelete: "set null" }),
     template: text("template", { enum: PAGE_TEMPLATES }).notNull().default("default"),
@@ -166,9 +183,12 @@ export const leaders = sqliteTable(
     wpId: integer("wp_id").unique(),
     slug: text("slug").notNull().unique(),
     name: text("name").notNull(),
+    nameEn: text("name_en").notNull().default(""),
     roleTitle: text("role_title").notNull().default(""),
+    roleTitleEn: text("role_title_en").notNull().default(""),
     groupKey: text("group_key", { enum: LEADER_GROUPS }).notNull().default("shoora"),
     bioHtml: text("bio_html").notNull().default(""),
+    bioHtmlEn: text("bio_html_en").notNull().default(""),
     photoMediaId: integer("photo_media_id").references(() => media.id, { onDelete: "set null" }),
     sortOrder: integer("sort_order").notNull().default(0),
     status: text("status", { enum: CONTENT_STATUSES }).notNull().default("published"),
@@ -182,6 +202,7 @@ export const galleryCategories = sqliteTable("gallery_categories", {
   wpId: integer("wp_id").unique(),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
+  nameEn: text("name_en").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 });
@@ -193,7 +214,9 @@ export const galleries = sqliteTable(
     wpId: integer("wp_id").unique(),
     slug: text("slug").notNull().unique(),
     title: text("title").notNull(),
+    titleEn: text("title_en").notNull().default(""),
     description: text("description").notNull().default(""),
+    descriptionEn: text("description_en").notNull().default(""),
     categoryId: integer("category_id").references(() => galleryCategories.id, { onDelete: "set null" }),
     coverMediaId: integer("cover_media_id").references(() => media.id, { onDelete: "set null" }),
     status: text("status", { enum: CONTENT_STATUSES }).notNull().default("published"),
@@ -224,8 +247,10 @@ export const videos = sqliteTable(
     wpId: integer("wp_id").unique(),
     slug: text("slug").notNull().unique(),
     title: text("title").notNull(),
+    titleEn: text("title_en").notNull().default(""),
     youtubeId: text("youtube_id").notNull(),
     description: text("description").notNull().default(""),
+    descriptionEn: text("description_en").notNull().default(""),
     status: text("status", { enum: CONTENT_STATUSES }).notNull().default("published"),
     publishedAt: text("published_at"),
     ...timestamps,
@@ -242,6 +267,7 @@ export const posters = sqliteTable(
       .notNull()
       .references(() => media.id, { onDelete: "cascade" }),
     title: text("title").notNull().default(""),
+    titleEn: text("title_en").notNull().default(""),
     linkUrl: text("link_url").notNull().default(""),
     sortOrder: integer("sort_order").notNull().default(0),
     active: integer("active", { mode: "boolean" }).notNull().default(true),
@@ -253,7 +279,9 @@ export const posters = sqliteTable(
 export const downloads = sqliteTable("downloads", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
+  titleEn: text("title_en").notNull().default(""),
   description: text("description").notNull().default(""),
+  descriptionEn: text("description_en").notNull().default(""),
   mediaId: integer("media_id")
     .notNull()
     .references(() => media.id, { onDelete: "cascade" }),
@@ -271,6 +299,7 @@ export const navItems = sqliteTable(
     id: integer("id").primaryKey({ autoIncrement: true }),
     menu: text("menu", { enum: NAV_MENUS }).notNull(),
     label: text("label").notNull(),
+    labelEn: text("label_en").notNull().default(""),
     url: text("url").notNull().default(""),
     parentId: integer("parent_id").references((): AnySQLiteColumn => navItems.id, { onDelete: "cascade" }),
     sortOrder: integer("sort_order").notNull().default(0),

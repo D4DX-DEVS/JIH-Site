@@ -25,30 +25,42 @@ request
        │    • missing page           → marks the rendered not-found page as 404
        └─ .open-next/worker.js       OpenNext: next.config redirects/headers, then Next.js
             ├─ route handlers        /media/*, /feed/, /sitemap.xml, /robots.txt, /admin/api/media/
-            └─ App Router pages      (site) public pages, admin/(panel) CMS
+            └─ App Router pages      [lang] public pages (ml, en), admin/(panel) CMS
 ```
 
 The entry fails open: if the D1 lookup errors, or a stored target is not a usable URL, the request goes to Next.js unchanged. Redirects to this site use a relative `Location`. The entry also re-exports OpenNext's Durable Object classes, which the optional shared cache needs.
 
-Why the custom entry exists: on workerd, a `redirect()` or `notFound()` raised during a page render arrives after the response headers have been sent (see "Workers runtime notes" below). The decisions that set a status code search engines rely on are therefore made in the Worker first. `src/lib/edge-routing.ts` mirrors the route table: a stored redirect applies only where Next.js would reach `(site)/[slug]` (and find no published page or post) or `(site)/[slug]/[...rest]`. A unit test fails if a new top-level folder appears under `src/app/(site)` without a rule. Under `next dev` / `next start` the same redirects and 404s still happen inside those pages, so behaviour matches.
+Why the custom entry exists: on workerd, a `redirect()` or `notFound()` raised during a page render arrives after the response headers have been sent (see "Workers runtime notes" below). The decisions that set a status code search engines rely on are therefore made in the Worker first. `src/lib/edge-routing.ts` mirrors the route table: a stored redirect applies only where Next.js would reach `[lang]/[slug]` (and find no published page or post) or `[lang]/[slug]/[...rest]`. A unit test fails if a new top-level folder appears under `src/app/[lang]` without a rule. English addresses (`/en/…`) follow the same rules on the path after the prefix, and their redirects stay under `/en/`. Under `next dev` / `next start` the same redirects and 404s still happen inside those pages, so behaviour matches.
 
 ## Routes
 
 | Path | Source | Notes |
 |---|---|---|
-| `/` | `(site)/page.tsx` | Homepage: banner, latest updates, Ameer updates, posters, news, videos, movement figures, organisations, gallery, contact |
-| `/<slug>/` | `(site)/[slug]` | Pages and posts share the root, as on WordPress. Page templates: default, news, hub, leaders, contact |
-| `/<a>/<b>/…` | `(site)/[slug]/[...rest]` | Legacy deep paths: stored redirect or 404 |
-| `/category/<path>/`, `/tag/<slug>/` | `(site)/category`, `(site)/tag` | Archives, `?page=N` pagination |
-| `/leadership/<slug>/` | `(site)/leadership` | Leader profiles (`/leaders/` is the listing page) |
-| `/image-gallery/`, `/image-gallery/<slug>/`, `/image-category/<slug>/` | `(site)/image-*` | Galleries with a lightbox |
-| `/video-gallery/`, `/video-gallery/<slug>/` | `(site)/video-gallery` | YouTube embeds, loaded on click |
-| `/downloads/`, `/search/` | `(site)/downloads`, `(site)/search` | |
+| `/` | `[lang]/page.tsx` | Homepage: banner, latest updates, Ameer updates, posters, news, videos, movement figures, organisations, gallery, contact |
+| `/<slug>/` | `[lang]/[slug]` | Pages and posts share the root, as on WordPress. Page templates: default, news, hub, leaders, contact |
+| `/<a>/<b>/…` | `[lang]/[slug]/[...rest]` | Legacy deep paths: stored redirect or 404 |
+| `/category/<path>/`, `/tag/<slug>/` | `[lang]/category`, `[lang]/tag` | Archives, `?page=N` pagination |
+| `/leadership/<slug>/` | `[lang]/leadership` | Leader profiles (`/leaders/` is the listing page) |
+| `/image-gallery/`, `/image-gallery/<slug>/`, `/image-category/<slug>/` | `[lang]/image-*` | Galleries with a lightbox |
+| `/video-gallery/`, `/video-gallery/<slug>/` | `[lang]/video-gallery` | YouTube embeds, loaded on click |
+| `/downloads/`, `/search/` | `[lang]/downloads`, `[lang]/search` | |
 | `/feed/`, `/sitemap.xml`, `/robots.txt` | route handlers | `robots.txt` blocks crawlers unless `SITE_INDEXABLE=true` |
 | `/media/<key>` | route handler | Streams R2 objects, `Cache-Control: public, max-age=31536000, immutable` |
 | `/admin/…` | `admin/` | CMS; `/admin/api/media/` takes uploads |
 
-`next.config.ts` keeps WordPress conventions: trailing slashes, `/blog/` → `/news/`, `/ml/*` (TranslatePress) → canonical page, `/wp-content/uploads/*` → `/media/uploads/*`, paged archives → `?page=N`, `/wp-admin` and `/wp-login.php` → admin. The full mapping is in `docs/URL_MAP.md`.
+`next.config.ts` keeps WordPress conventions: trailing slashes, `/blog/` → `/news/`, `/ml/*` (TranslatePress) → the Malayalam page, `/wp-content/uploads/*` → `/media/uploads/*`, paged archives → `?page=N`, `/wp-admin` and `/wp-login.php` → admin. The full mapping is in `docs/URL_MAP.md`.
+
+## Languages
+
+Malayalam is the default language and keeps the WordPress addresses; English is the same address under `/en/`. `next.config.ts` rewrites unprefixed public addresses to `/ml/…` (after files and static routes), so both languages render through `src/app/[lang]`, whose `layout.tsx` is the site's root layout (`<html lang>`, fonts, header, footer). The admin has its own root layout in `src/app/admin/layout.tsx`.
+
+- `src/lib/i18n/config.ts`: locales and `localizePath()` (adds or removes `/en`; files, `/admin`, `/feed` and other sites are left alone).
+- `src/lib/i18n/server.ts`: `getLocale()` / `getI18n()` read the `[lang]` root param (`next/root-params`) in Server Components. Route handlers and server actions have no root params and take the locale explicitly.
+- `src/components/i18n/`: `useI18n()` for Client Components, a `Link` that localizes internal addresses, the ML/EN switcher (in the header's top bar), and the notice shown when a record is not available in the reader's language. Public code imports `Link` from here, never `next/link` directly.
+- The header menu (`src/components/site/header-nav-bar.tsx`) shows the full bar from `xl` while its items fit and the menu button otherwise; Malayalam labels run long, so the switch follows the measured width.
+- `src/lib/i18n/en.ts` and `ml.ts` (joined in `dictionaries.ts`): every piece of interface text. English is the reference shape, so TypeScript rejects a missing Malayalam key, and a unit test fails when a Malayalam entry is left in English.
+- Content is bilingual in the database: plain columns hold Malayalam, `…En` columns English (`title`/`titleEn`, `contentHtml`/`contentHtmlEn` …; settings use `name`/`nameEn` keys). Data getters take the locale and return one language per record plus `lang`, the language actually shown (`src/lib/i18n/content.ts`): the reader's when the record has it, otherwise the other one. A record is never shown with both languages mixed: a title falls back to the other language when the reader's is empty (marked with `lang`), but summaries, excerpts and descriptions only appear in the record's own language (`ownText`). `search_text` covers both languages.
+- WordPress stored an English version followed by the Malayalam one in the same body. `scripts/migrate/lib/language.ts` separates them (only bodies shaped as one English run and one Malayalam run; a Malayalam article with an English caption stays whole). The import runs it as its last step; `npm run migrate:split-languages` applies it to a database imported earlier.
 
 ## Data
 

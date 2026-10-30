@@ -78,7 +78,7 @@ async function MediaGrid({ params, kind }: { params: AdminListParams<Sort>; kind
           const name = m.title || m.filename;
           return (
             <li key={m.id} className="flex h-full flex-col overflow-hidden rounded-lg border bg-card">
-              <div className="relative aspect-square bg-muted">
+              <div className="relative aspect-square overflow-hidden bg-muted">
                 {m.kind === "image" ? (
                   <img src={pickVariant(m, 320)} alt={m.altText} className="size-full object-cover" loading="lazy" />
                 ) : (
@@ -104,7 +104,7 @@ async function MediaGrid({ params, kind }: { params: AdminListParams<Sort>; kind
                       variants: m.variants, title: m.title, altText: m.altText, caption: m.caption,
                     }}
                     trigger={
-                      <Button variant="ghost" size="icon" className="size-11 sm:size-9" aria-label={`Edit details of ${name}`}>
+                      <Button variant="ghost" size="icon" className="size-9 sm:size-8" aria-label={`Edit details of ${name}`}>
                         <Pencil className="size-4" aria-hidden="true" />
                       </Button>
                     }
@@ -144,7 +144,7 @@ export default async function AdminMediaPage({ searchParams }: PageProps<"/admin
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">Media library</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">Media library</h1>
           <p className="mt-1 text-sm text-muted-foreground">Images and documents stored in R2. JPEG, PNG, GIF, WebP, AVIF up to 10 MB; PDF up to 25 MB.</p>
         </div>
         <UploadButton />

@@ -100,7 +100,7 @@ function MediaDetailsForm({ item, onDone }: { item: MediaDetails; onDone: () => 
       </div>
       <form onSubmit={onSubmit} noValidate className="space-y-4">
         <Field id="media-title" label="Title" error={errors.title?.message}>
-          <Input id="media-title" className="h-11" {...form.register("title")} />
+          <Input id="media-title" className="h-9" {...form.register("title")} />
         </Field>
         {item.kind === "image" ? (
           <Field id="media-alt" label="Alternative text" error={errors.altText?.message} hint="Describe the picture for people who cannot see it. Leave empty only for decoration.">
@@ -111,10 +111,10 @@ function MediaDetailsForm({ item, onDone }: { item: MediaDetails; onDone: () => 
           <Textarea id="media-caption" rows={2} {...form.register("caption")} />
         </Field>
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" className="h-11 sm:h-9" onClick={onDone} disabled={pending}>
+          <Button type="button" variant="outline" className="h-9 sm:h-8" onClick={onDone} disabled={pending}>
             Cancel
           </Button>
-          <Button type="submit" className="h-11 sm:h-9" disabled={pending}>
+          <Button type="submit" className="h-9 sm:h-8" disabled={pending}>
             {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
             {pending ? "Saving…" : "Save"}
           </Button>

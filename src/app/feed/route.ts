@@ -9,7 +9,8 @@ const escapeXml = (s: string) => s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">
 /** RSS 2.0 feed at the WordPress feed URL (/feed/), so existing subscribers keep receiving posts. */
 export async function GET(): Promise<Response> {
   await connection();
-  const [{ data }, { site }] = await Promise.all([listPosts({ page: 1, pageSize: 20 }), getSettings()]);
+  // The feed predates the English site and its subscribers read Malayalam.
+  const [{ data }, { site }] = await Promise.all([listPosts({ page: 1, pageSize: 20 }, "ml"), getSettings("ml")]);
   const items = data
     .map(
       (p) => `    <item>
