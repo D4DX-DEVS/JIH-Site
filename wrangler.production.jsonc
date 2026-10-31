@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "jih-kerala",
+  "name": "jih-site",
   // Wraps the OpenNext build: legacy redirects, the admin sign-in gate and 404 status codes (src/lib/edge-routing.ts).
   "main": "worker.ts",
   "compatibility_date": "2026-10-01",
@@ -12,7 +12,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "jih-kerala"
+      "service": "jih-site"
     }
   ],
   // Production D1/R2 on the Cloudflare account. "remote": true makes the migration scripts
